@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Box,
   AppBar,
@@ -9,22 +9,13 @@ import {
   Container,
   Button,
   Grid,
-  Card,
-  CardContent,
-  CardActionArea,
-  Chip,
+  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Paper,
-  IconButton,
-  LinearProgress,
-  Skeleton,
-  Stack,
-  Alert,
   Menu,
   MenuItem,
   Divider,
@@ -33,716 +24,52 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-  Avatar,
   ListItemIcon,
   ListItemText,
   InputAdornment,
-  Tabs,
-  Tab,
   Snackbar,
+  Alert,
   Breadcrumbs,
   Link as MuiLink,
-  Tooltip,
+  Stack,
+  Chip,
   CircularProgress,
 } from "@mui/material";
 import {
   UploadCloud,
   FileCode,
-  CheckCircle,
-  Loader2,
   ArrowLeft,
   ShieldAlert,
   Search,
-  MoreHorizontal,
   Users,
   ChevronDown,
   Plus,
   Building,
-  XCircle,
   Settings,
-  Trash2,
-  Mail,
-  Key,
-  MoreVertical,
   Edit2,
   Filter,
   ArrowUpDown,
-  AlertCircle,
   ChevronRight,
   Home,
   Sparkles,
   Bot,
-  FileText,
+  Trash2,
+  CheckCircle,
 } from "lucide-react";
 
-// --- Gemini API Helper ---
-const apiKey = "";
+// Import types
+import type { Team, Project, Vulnerability, Severity } from "./types";
 
-async function callGeminiAPI(prompt: string): Promise<string> {
-  if (!apiKey) {
-    console.warn("Gemini API Key is missing. Using mock response.");
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+// Import components
+import { SeverityChip } from "./components/SeverityChip";
+import { ProjectCard } from "./components/ProjectCard";
+import { UploadArea } from "./components/UploadArea";
+import { TeamSettings } from "./components/TeamSettings";
 
-    if (prompt.includes("Project Analysis")) {
-      return `**プロジェクト分析レポート**\n\nこのプロジェクトは **Critical** レベルの脆弱性を複数含んでおり、即時の対応が必要です。\n\n1. **OpenSSLの更新**: 攻撃者がメモリ内容を読み取る可能性があるため、バージョン3.0.7以上への更新を最優先してください。\n2. **Log4jの確認**: 検出されたバージョンは古い可能性があります。Log4Shellの回避策が適用されているか確認が必要です。\n\n全体的なセキュリティスコアは **D** です。早急なパッチ適用を推奨します。`;
-    } else {
-      return `**AIによる解説と対策**\n\nこの脆弱性は、攻撃者がリモートで任意のコードを実行できる可能性があります（RCE）。\n\n**推奨される対策:**\n1. パッケージを最新の安定版にアップデートしてください。\n2. アップデートできない場合は、該当機能へのアクセス制限を行ってください。\n\n影響範囲は限定的ですが、放置すると危険です。`;
-    }
-  }
+// Import utilities
+import { callGeminiAPI } from "./lib/gemini";
+import { generateMockVulnerabilities } from "./lib/mockData";
 
-  try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      }
-    );
-    if (!response.ok) throw new Error(`API Error: ${response.status}`);
-    const data = await response.json();
-    return (
-      data.candidates?.[0]?.content?.parts?.[0]?.text ||
-      "No response generated."
-    );
-  } catch (error) {
-    console.error("Gemini API Call Failed:", error);
-    throw error;
-  }
-}
-
-// --- Types ---
-
-type Severity = "Critical" | "High" | "Medium" | "Low";
-type Status = "analyzing" | "completed" | "failed";
-type Role = "Admin" | "Editor" | "Viewer";
-
-interface Vulnerability {
-  id: string;
-  packageName: string;
-  version: string;
-  severity: Severity;
-  cve: string;
-  description: string;
-}
-
-interface Team {
-  id: string;
-  name: string;
-}
-
-interface Member {
-  id: string;
-  name: string;
-  email: string;
-  role: Role;
-  avatarUrl?: string;
-}
-
-interface Project {
-  id: string;
-  teamId: string;
-  name: string;
-  fileName: string;
-  uploadDate: Date;
-  status: Status;
-  vulnerabilities: Vulnerability[];
-  pkgCount: number;
-  errorMessage?: string;
-}
-
-// --- Mock Data Generators ---
-
-const generateMockVulnerabilities = (count: number): Vulnerability[] => {
-  const severities: Severity[] = ["Critical", "High", "Medium", "Low"];
-  const packages = [
-    "log4j-core",
-    "react",
-    "lodash",
-    "axios",
-    "spring-web",
-    "jackson-databind",
-    "openssl",
-  ];
-  return Array.from({ length: count }).map((_, i) => {
-    const severity = severities[Math.floor(Math.random() * severities.length)];
-    const pkg = packages[Math.floor(Math.random() * packages.length)];
-    return {
-      id: `vuln-${i}`,
-      packageName: pkg,
-      version: `${Math.floor(Math.random() * 5)}.${Math.floor(
-        Math.random() * 10
-      )}.${Math.floor(Math.random() * 10)}`,
-      severity,
-      cve: `CVE-202${Math.floor(Math.random() * 4) + 1}-${
-        Math.floor(Math.random() * 10000) + 1000
-      }`,
-      description: `Mock description for vulnerability in ${pkg}. This simulates a security finding.`,
-    };
-  });
-};
-
-const generateMockMembers = (): Member[] => [
-  {
-    id: "u1",
-    name: "Yamada Taro",
-    email: "taro@example.com",
-    role: "Admin",
-    avatarUrl: "",
-  },
-  {
-    id: "u2",
-    name: "Suzuki Hanako",
-    email: "hanako@example.com",
-    role: "Editor",
-    avatarUrl: "",
-  },
-  {
-    id: "u3",
-    name: "Tanaka Ken",
-    email: "ken@example.com",
-    role: "Viewer",
-    avatarUrl: "",
-  },
-];
-
-// --- Components ---
-
-const SeverityChip = ({ severity }: { severity: Severity }) => {
-  let color: "error" | "warning" | "info" | "success" = "info";
-  if (severity === "Critical" || severity === "High") color = "error";
-  if (severity === "Medium") color = "warning";
-  return (
-    <Chip
-      label={severity}
-      color={color}
-      size="small"
-      variant={severity === "Critical" ? "filled" : "outlined"}
-      sx={{ fontWeight: "bold", minWidth: 80 }}
-    />
-  );
-};
-
-// 2. Project Card
-const ProjectCard = ({
-  project,
-  onClick,
-  onMenuClick,
-}: {
-  project: Project;
-  onClick: () => void;
-  onMenuClick: (e: React.MouseEvent, project: Project) => void;
-}) => {
-  const isAnalyzing = project.status === "analyzing";
-  const isFailed = project.status === "failed";
-
-  return (
-    <Card
-      variant="outlined"
-      sx={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        position: "relative",
-        transition: "all 0.2s",
-        borderColor: "rgba(0, 0, 0, 0.12)",
-        bgcolor: "white",
-        "&:hover": {
-          borderColor: "primary.main",
-          boxShadow: 3,
-          transform: "translateY(-2px)",
-        },
-      }}
-    >
-      <IconButton
-        size="small"
-        onClick={(e) => onMenuClick(e, project)}
-        sx={{
-          position: "absolute",
-          top: 8,
-          right: 8,
-          zIndex: 10,
-          bgcolor: "rgba(255,255,255,0.8)",
-          "&:hover": { bgcolor: "white" },
-        }}
-      >
-        <MoreVertical size={18} />
-      </IconButton>
-
-      <CardActionArea
-        onClick={onClick}
-        disabled={isAnalyzing || isFailed}
-        sx={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "stretch",
-          justifyContent: "flex-start",
-        }}
-      >
-        <Box
-          sx={{
-            width: "100%",
-            height: 100,
-            bgcolor: isFailed ? "error.50" : "grey.100",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            color: isFailed ? "error.main" : "grey.500",
-          }}
-        >
-          {isAnalyzing ? (
-            <Loader2 className="animate-spin" size={40} />
-          ) : isFailed ? (
-            <AlertCircle size={40} />
-          ) : (
-            <FileCode size={40} />
-          )}
-        </Box>
-
-        <CardContent sx={{ width: "100%", pt: 2, flexGrow: 1 }}>
-          <Box sx={{ mb: 1, display: "flex", alignItems: "center", gap: 1 }}>
-            {isAnalyzing ? (
-              <Chip
-                icon={<Loader2 size={14} className="animate-spin" />}
-                label="解析中..."
-                color="warning"
-                size="small"
-                variant="outlined"
-              />
-            ) : isFailed ? (
-              <Chip
-                icon={<XCircle size={14} />}
-                label="解析失敗"
-                color="error"
-                size="small"
-                variant="filled"
-              />
-            ) : (
-              <Chip
-                icon={<CheckCircle size={14} />}
-                label="完了"
-                color="success"
-                size="small"
-                variant="outlined"
-              />
-            )}
-            <Typography variant="caption" color="text.secondary">
-              {project.uploadDate.toLocaleDateString()}
-            </Typography>
-          </Box>
-
-          <Box sx={{ width: "100%", mb: 2 }}>
-            <Typography
-              variant="h6"
-              component="div"
-              noWrap
-              sx={{ fontWeight: 600, mb: 0.5 }}
-            >
-              {project.name}
-            </Typography>
-            <Typography variant="body2" color="text.secondary" noWrap>
-              {project.fileName}
-            </Typography>
-          </Box>
-
-          {isAnalyzing ? (
-            <Stack spacing={1}>
-              <Skeleton variant="text" width="60%" />
-              <Skeleton variant="text" width="40%" />
-              <LinearProgress sx={{ mt: 1, borderRadius: 1 }} />
-            </Stack>
-          ) : isFailed ? (
-            <Box sx={{ width: "100%" }}>
-              <Typography
-                variant="body2"
-                color="error"
-                sx={{
-                  display: "-webkit-box",
-                  overflow: "hidden",
-                  WebkitBoxOrient: "vertical",
-                  WebkitLineClamp: 2,
-                  wordBreak: "break-all",
-                  lineHeight: 1.5,
-                  fontSize: "0.875rem",
-                }}
-              >
-                {project.errorMessage || "ファイル形式が不正です。"}
-              </Typography>
-            </Box>
-          ) : (
-            <Box>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 1 }}>
-                <Chip
-                  size="small"
-                  label={`${project.vulnerabilities.length} 脆弱性`}
-                  icon={<ShieldAlert size={14} />}
-                  sx={{
-                    bgcolor: "error.50",
-                    color: "error.main",
-                    border: "none",
-                  }}
-                />
-                <Chip
-                  size="small"
-                  label={`${project.pkgCount} パッケージ`}
-                  sx={{ bgcolor: "grey.100", border: "none" }}
-                />
-              </Box>
-              <Box sx={{ display: "flex", gap: 0.5, mt: 2 }}>
-                {project.vulnerabilities.some(
-                  (v) => v.severity === "Critical"
-                ) && (
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "error.main",
-                    }}
-                    title="Critical"
-                  />
-                )}
-                {project.vulnerabilities.some((v) => v.severity === "High") && (
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "orange",
-                    }}
-                    title="High"
-                  />
-                )}
-                {project.vulnerabilities.some(
-                  (v) => v.severity === "Medium"
-                ) && (
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: "50%",
-                      bgcolor: "warning.main",
-                    }}
-                    title="Medium"
-                  />
-                )}
-              </Box>
-            </Box>
-          )}
-        </CardContent>
-      </CardActionArea>
-    </Card>
-  );
-};
-
-// 3. Upload Area
-const UploadArea = ({ onUpload }: { onUpload: (file: File) => void }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragActive, setIsDragActive] = useState(false);
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files?.[0]) onUpload(e.target.files[0]);
-  };
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(true);
-  };
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-  };
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragActive(false);
-    if (e.dataTransfer.files?.[0]) onUpload(e.dataTransfer.files[0]);
-  };
-
-  return (
-    <Paper
-      variant="outlined"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-      sx={{
-        p: 6,
-        borderStyle: "dashed",
-        borderWidth: 2,
-        borderRadius: 4,
-        textAlign: "center",
-        cursor: "pointer",
-        transition: "all 0.2s ease-in-out",
-        borderColor: isDragActive ? "primary.main" : "grey.400",
-        bgcolor: isDragActive ? "primary.50" : "grey.50",
-        transform: isDragActive ? "scale(1.02)" : "scale(1)",
-        "&:hover": {
-          borderColor: "primary.main",
-          bgcolor: isDragActive ? "primary.50" : "action.hover",
-        },
-      }}
-      onClick={() => fileInputRef.current?.click()}
-    >
-      <input
-        type="file"
-        hidden
-        ref={fileInputRef}
-        accept=".json,.xml,.spdx"
-        onChange={handleFileChange}
-      />
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          mb: 2,
-          color: isDragActive ? "primary.dark" : "primary.main",
-        }}
-      >
-        <UploadCloud size={48} strokeWidth={1.5} />
-      </Box>
-      <Typography
-        variant="h5"
-        gutterBottom
-        sx={{
-          fontWeight: "bold",
-          color: isDragActive ? "primary.dark" : "text.primary",
-        }}
-      >
-        {isDragActive
-          ? "ここにファイルをドロップ"
-          : "SBOMファイルをアップロード"}
-      </Typography>
-      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        SPDX, CycloneDX 形式のJSONまたはXMLファイルをドラッグ＆ドロップ
-        <br />
-        またはクリックして選択してください
-        <br />
-        <Typography variant="caption" color="error">
-          ( &quot;error&quot; を含むファイル名で失敗をテストできます )
-        </Typography>
-      </Typography>
-      <Button
-        variant="contained"
-        size="large"
-        disableElevation
-        sx={{ pointerEvents: "none" }}
-      >
-        ファイルを選択
-      </Button>
-    </Paper>
-  );
-};
-
-// 5. Team Settings
-const TeamSettings = ({
-  team,
-  onUpdateTeamName,
-  onDeleteTeam,
-}: {
-  team: Team;
-  onUpdateTeamName: (name: string) => void;
-  onDeleteTeam: () => void;
-}) => {
-  const [tabIndex, setTabIndex] = useState(0);
-  const [teamName, setTeamName] = useState(team.name);
-  const [members, setMembers] = useState<Member[]>(generateMockMembers());
-  const [inviteEmail, setInviteEmail] = useState("");
-
-  const handleInvite = () => {
-    if (!inviteEmail) return;
-    const newMember: Member = {
-      id: `u-${Date.now()}`,
-      name: inviteEmail.split("@")[0],
-      email: inviteEmail,
-      role: "Viewer",
-    };
-    setMembers([...members, newMember]);
-    setInviteEmail("");
-  };
-
-  return (
-    <Box sx={{ maxWidth: 800, mx: "auto", mt: 4 }}>
-      <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
-        チーム設定
-      </Typography>
-      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
-        <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)}>
-          <Tab
-            label="一般設定"
-            icon={<Settings size={16} />}
-            iconPosition="start"
-          />
-          <Tab
-            label="メンバー管理"
-            icon={<Users size={16} />}
-            iconPosition="start"
-          />
-          <Tab label="API連携" icon={<Key size={16} />} iconPosition="start" />
-        </Tabs>
-      </Box>
-
-      {tabIndex === 0 && (
-        <Stack spacing={4}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight="bold">
-              チーム名
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                fullWidth
-                value={teamName}
-                onChange={(e) => setTeamName(e.target.value)}
-                size="small"
-              />
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={() => onUpdateTeamName(teamName)}
-                disabled={teamName === team.name}
-              >
-                保存
-              </Button>
-            </Box>
-          </Paper>
-          <Paper
-            variant="outlined"
-            sx={{ p: 3, borderColor: "error.main", bgcolor: "error.50" }}
-          >
-            <Typography
-              variant="h6"
-              color="error"
-              gutterBottom
-              fontWeight="bold"
-            >
-              Danger Zone
-            </Typography>
-            <Typography variant="body2" paragraph>
-              このチームを削除すると、すべてのプロジェクトと設定が永久に失われます。この操作は取り消せません。
-            </Typography>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<Trash2 size={16} />}
-              onClick={onDeleteTeam}
-            >
-              チームを削除する
-            </Button>
-          </Paper>
-        </Stack>
-      )}
-
-      {tabIndex === 1 && (
-        <Stack spacing={3}>
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Typography variant="h6" gutterBottom fontWeight="bold">
-              メンバーを招待
-            </Typography>
-            <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField
-                fullWidth
-                placeholder="colleague@example.com"
-                size="small"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <Mail size={16} />
-                    </InputAdornment>
-                  ),
-                }}
-              />
-              <Button
-                variant="contained"
-                disableElevation
-                onClick={handleInvite}
-              >
-                招待
-              </Button>
-            </Box>
-          </Paper>
-          <Paper variant="outlined">
-            <Table>
-              <TableHead sx={{ bgcolor: "grey.50" }}>
-                <TableRow>
-                  <TableCell>名前 / メール</TableCell>
-                  <TableCell>ロール</TableCell>
-                  <TableCell align="right">操作</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {members.map((m) => (
-                  <TableRow key={m.id}>
-                    <TableCell>
-                      <Box
-                        sx={{ display: "flex", alignItems: "center", gap: 2 }}
-                      >
-                        <Avatar sx={{ width: 32, height: 32 }}>
-                          {m.name[0]}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="body2" fontWeight="bold">
-                            {m.name}
-                          </Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {m.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={m.role}
-                        size="small"
-                        variant="outlined"
-                        color={m.role === "Admin" ? "primary" : "default"}
-                      />
-                    </TableCell>
-                    <TableCell align="right">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() =>
-                          setMembers(members.filter((x) => x.id !== m.id))
-                        }
-                      >
-                        <XCircle size={18} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Paper>
-        </Stack>
-      )}
-
-      {tabIndex === 2 && (
-        <Paper variant="outlined" sx={{ p: 3 }}>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 2 }}>
-            <Key className="text-gray-500" />
-            <Box>
-              <Typography variant="h6" fontWeight="bold">
-                API連携
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                CI/CDパイプラインからの自動アップロード用キー
-              </Typography>
-            </Box>
-          </Box>
-          <TextField
-            fullWidth
-            value="sk_live_51Mx...MockKey...XYZ"
-            disabled
-            InputProps={{ endAdornment: <Button size="small">コピー</Button> }}
-            sx={{ bgcolor: "grey.50" }}
-          />
-        </Paper>
-      )}
-    </Box>
-  );
-};
-
-// 4. Main Application
 export default function App() {
   const [teams, setTeams] = useState<Team[]>([
     { id: "team-1", name: "My Workspace" },
@@ -839,6 +166,7 @@ export default function App() {
       `チームを「${teams.find((t) => t.id === teamId)?.name}」に切り替えました`
     );
   };
+
   const handleCreateTeamSubmit = () => {
     if (!newTeamName.trim()) return;
     const newTeam: Team = { id: `team-${Date.now()}`, name: newTeamName };
@@ -861,7 +189,6 @@ export default function App() {
     }
   };
 
-  // Missing functions restored:
   const handleUpdateTeamName = (name: string) => {
     setTeams(teams.map((t) => (t.id === currentTeamId ? { ...t, name } : t)));
     showNotification("チーム名を更新しました");
