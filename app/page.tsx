@@ -991,7 +991,7 @@ export default function App() {
         <Toolbar>
           <Button
             onClick={(e) => {
-              setTeamMenuAnchor(e.currentTarget);
+              setTeamMenuAnchor(e.currentTarget as HTMLElement);
               setTeamSearchQuery("");
             }}
             startIcon={
@@ -1209,7 +1209,7 @@ export default function App() {
                       onMenuClick={(e, p) => {
                         e.stopPropagation();
                         setMenuProject(p);
-                        setProjectMenuAnchor(e.currentTarget);
+                        setProjectMenuAnchor(e.currentTarget as HTMLElement);
                       }}
                     />
                   </Grid>
