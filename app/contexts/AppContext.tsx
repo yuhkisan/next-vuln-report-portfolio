@@ -50,7 +50,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       name: `Project Team ${i + 6}`,
     })),
   ]);
-  const [currentTeamId, setCurrentTeamId] = useState<string>("team-1");
+  const [currentTeamId, setCurrentTeamId] = useState("team-1");
 
   // プロジェクト状態
   const [projects, setProjects] = useState<Project[]>([]);
