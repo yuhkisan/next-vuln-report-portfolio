@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { Box, Container, Button } from "@mui/material";
 import { ArrowLeft } from "lucide-react";
 import { useApp } from "../contexts/AppContext";
-import { TeamSettings } from "../components/TeamSettings";
+import { TeamSettings } from "./TeamSettings";
 
 export default function SettingsPage() {
   const router = useRouter();

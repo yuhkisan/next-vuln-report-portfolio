@@ -22,7 +22,7 @@ import {
 } from "@mui/material";
 import { Search, Settings, UploadCloud, Edit2, Trash2 } from "lucide-react";
 import { useApp } from "../contexts/AppContext";
-import { ProjectCard } from "../components/ProjectCard";
+import { ProjectCard } from "./ProjectCard";
 import type { Project } from "../types";
 
 export const ProjectListView = () => {

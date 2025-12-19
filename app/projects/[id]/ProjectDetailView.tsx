@@ -39,7 +39,7 @@ import {
   ArrowUpDown,
 } from "lucide-react";
 import { useApp } from "../../contexts/AppContext";
-import { SeverityChip } from "../../components/SeverityChip";
+import { SeverityChip } from "./SeverityChip";
 import { callGeminiAPI } from "../../lib/gemini";
 import type { Vulnerability, Severity } from "../../types";
 
