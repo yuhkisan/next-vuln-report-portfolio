@@ -23,11 +23,11 @@ import { Settings, Users, Key, Trash2, Mail, XCircle } from "lucide-react";
 import type { Team, Member } from "../types";
 import { generateMockMembers } from "../lib/mockData";
 
-interface TeamSettingsProps {
+type TeamSettingsProps = {
   team: Team;
   onUpdateTeamName: (name: string) => void;
   onDeleteTeam: () => void;
-}
+};
 
 export const TeamSettings = ({
   team,

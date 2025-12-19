@@ -11,7 +11,7 @@ import type { Team, Project } from "../types";
 import { generateMockVulnerabilities } from "../lib/mockData";
 
 // Context の型定義
-interface AppContextType {
+type AppContextType = {
   // チーム関連
   teams: Team[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
@@ -32,7 +32,7 @@ interface AppContextType {
     event?: React.SyntheticEvent | Event,
     reason?: string
   ) => void;
-}
+};
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 

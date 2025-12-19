@@ -22,11 +22,11 @@ import {
 } from "lucide-react";
 import type { Project } from "../types";
 
-interface ProjectCardProps {
+type ProjectCardProps = {
   project: Project;
   onClick: () => void;
   onMenuClick: (e: React.MouseEvent, project: Project) => void;
-}
+};
 
 export const ProjectCard = ({
   project,
