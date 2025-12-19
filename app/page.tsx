@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Box, Container, Chip } from "@mui/material";
 import { Building } from "lucide-react";
 import { useApp } from "./contexts/AppContext";
-import { UploadArea } from "./components/UploadArea";
+import { UploadArea } from "./UploadArea";
 import { generateMockVulnerabilities } from "./lib/mockData";
 import type { Project } from "./types";
 
