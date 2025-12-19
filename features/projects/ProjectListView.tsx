@@ -21,11 +21,11 @@ import {
   ListItemText,
 } from "@mui/material";
 import { Search, Settings, UploadCloud, Edit2, Trash2 } from "lucide-react";
-import { useApp } from "../contexts/AppContext";
-import { ProjectCard } from "../components/ProjectCard";
-import type { Project } from "../types";
+import { useApp } from "@/app/contexts/AppContext";
+import { ProjectCard } from "@/app/components/ProjectCard";
+import type { Project } from "@/app/types";
 
-export default function ProjectsPage() {
+export const ProjectListView = () => {
   const router = useRouter();
   const {
     currentTeam,
@@ -249,4 +249,4 @@ export default function ProjectsPage() {
       </Container>
     </Box>
   );
-}
+};
