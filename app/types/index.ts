@@ -2,29 +2,29 @@ export type Severity = "Critical" | "High" | "Medium" | "Low";
 export type Status = "analyzing" | "completed" | "failed";
 export type Role = "Admin" | "Editor" | "Viewer";
 
-export interface Vulnerability {
+export type Vulnerability = {
   id: string;
   packageName: string;
   version: string;
   severity: Severity;
   cve: string;
   description: string;
-}
+};
 
-export interface Team {
+export type Team = {
   id: string;
   name: string;
-}
+};
 
-export interface Member {
+export type Member = {
   id: string;
   name: string;
   email: string;
   role: Role;
   avatarUrl?: string;
-}
+};
 
-export interface Project {
+export type Project = {
   id: string;
   teamId: string;
   name: string;
@@ -34,4 +34,4 @@ export interface Project {
   vulnerabilities: Vulnerability[];
   pkgCount: number;
   errorMessage?: string;
-}
+};
