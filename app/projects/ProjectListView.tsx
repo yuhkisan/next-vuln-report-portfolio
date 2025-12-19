@@ -21,9 +21,9 @@ import {
   ListItemText,
 } from "@mui/material";
 import { Search, Settings, UploadCloud, Edit2, Trash2 } from "lucide-react";
-import { useApp } from "@/app/contexts/AppContext";
-import { ProjectCard } from "@/app/components/ProjectCard";
-import type { Project } from "@/app/types";
+import { useApp } from "../contexts/AppContext";
+import { ProjectCard } from "../components/ProjectCard";
+import type { Project } from "../types";
 
 export const ProjectListView = () => {
   const router = useRouter();

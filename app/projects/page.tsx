@@ -1,4 +1,4 @@
-import { ProjectListView } from "@/features/projects/ProjectListView";
+import { ProjectListView } from "./ProjectListView";
 
 export default function ProjectsPage() {
   return <ProjectListView />;
