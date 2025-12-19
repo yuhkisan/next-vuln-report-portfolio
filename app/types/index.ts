@@ -1,6 +1,4 @@
 export type Severity = "Critical" | "High" | "Medium" | "Low";
-export type Status = "analyzing" | "completed" | "failed";
-export type Role = "Admin" | "Editor" | "Viewer";
 
 export interface Vulnerability {
   id: string;
@@ -20,7 +18,7 @@ export interface Member {
   id: string;
   name: string;
   email: string;
-  role: Role;
+  role: "Admin" | "Editor" | "Viewer";
   avatarUrl?: string;
 }
 
@@ -30,7 +28,7 @@ export interface Project {
   name: string;
   fileName: string;
   uploadDate: Date;
-  status: Status;
+  status: "analyzing" | "completed" | "failed";
   vulnerabilities: Vulnerability[];
   pkgCount: number;
   errorMessage?: string;
