@@ -93,7 +93,7 @@ export const ProjectListView = () => {
         {filteredProjects.length > 0 ? (
           <Grid container spacing={3}>
             {filteredProjects.map((project) => (
-              <Grid item xs={12} sm={6} md={4} key={project.id}>
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={project.id}>
                 <Link
                   href={
                     project.status === "completed"
