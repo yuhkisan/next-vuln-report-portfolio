@@ -158,7 +158,7 @@ export const ProjectDetailView = () => {
         {/* プロジェクトヘッダー */}
         <Paper sx={{ p: 3, mb: 3 }}>
           <Grid container alignItems="center" spacing={2}>
-            <Grid item>
+            <Grid>
               <Box
                 sx={{
                   width: 60,
@@ -174,7 +174,7 @@ export const ProjectDetailView = () => {
                 <FileCode size={32} />
               </Box>
             </Grid>
-            <Grid item xs>
+            <Grid size="grow">
               <Box
                 sx={{
                   display: "flex",
@@ -197,7 +197,7 @@ export const ProjectDetailView = () => {
                 {project.uploadDate.toLocaleString()}
               </Typography>
             </Grid>
-            <Grid item>
+            <Grid>
               <Stack direction="row" spacing={2} alignItems="center">
                 <Button
                   variant="contained"
