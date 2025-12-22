@@ -23,17 +23,33 @@ import {
 import { Search, Settings, UploadCloud, Edit2, Trash2 } from "lucide-react";
 import { useApp } from "../contexts/AppContext";
 import { ProjectCard } from "./ProjectCard";
-import type { Project } from "../types";
+import type { Project, Team } from "../types";
 
-export const ProjectListView = () => {
+type Props = {
+  initialProjects?: Project[];
+  initialTeams?: Team[];
+};
+
+export const ProjectListView = ({ initialProjects, initialTeams }: Props) => {
   const router = useRouter();
   const {
     currentTeam,
     filteredProjects,
     projects,
     setProjects,
+    setTeams,
     showNotification,
   } = useApp();
+
+  // DBからの初期データをContextに反映
+  React.useEffect(() => {
+    if (initialTeams && initialTeams.length > 0) {
+      setTeams(initialTeams);
+    }
+    if (initialProjects) {
+      setProjects(initialProjects);
+    }
+  }, [initialTeams, initialProjects, setTeams, setProjects]);
 
   // プロジェクトメニュー
   const [projectMenuAnchor, setProjectMenuAnchor] =
