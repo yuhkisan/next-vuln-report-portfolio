@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo } from "react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
 import {
   Box,
   Container,
@@ -38,19 +37,19 @@ import {
   Filter,
   ArrowUpDown,
 } from "lucide-react";
-import { useApp } from "../../contexts/AppContext";
 import { SeverityChip } from "./SeverityChip";
 import { callGeminiAPI } from "../../lib/gemini";
-import type { Vulnerability, Severity } from "../../types";
+import type { Project, Team, Vulnerability, Severity } from "../../types";
 
-export const ProjectDetailView = () => {
-  const params = useParams();
-  const projectId = params.id as string;
-  const { projects, currentTeam } = useApp();
+type ProjectDetailViewProps = {
+  project: Project;
+  currentTeam: Team;
+};
 
-  // プロジェクトを取得
-  const project = projects.find((p) => p.id === projectId);
-
+export const ProjectDetailView = ({
+  project,
+  currentTeam,
+}: ProjectDetailViewProps) => {
   // フィルタ・ソート状態
   const [vulnSearchQuery, setVulnSearchQuery] = useState("");
   const [severityFilter, setSeverityFilter] = useState<Severity | "All">("All");
@@ -66,7 +65,6 @@ export const ProjectDetailView = () => {
 
   // フィルタリング済み脆弱性
   const filteredVulnerabilities = useMemo(() => {
-    if (!project) return [];
     let vulns = [...project.vulnerabilities];
     if (severityFilter !== "All")
       vulns = vulns.filter((v) => v.severity === severityFilter);
@@ -85,7 +83,7 @@ export const ProjectDetailView = () => {
         : a.packageName.localeCompare(b.packageName)
     );
     return vulns;
-  }, [project, severityFilter, vulnSearchQuery, sortOrder]);
+  }, [project.vulnerabilities, severityFilter, vulnSearchQuery, sortOrder]);
 
   // AI 解説
   const handleAiRemediation = async (vuln: Vulnerability) => {
@@ -107,7 +105,6 @@ export const ProjectDetailView = () => {
 
   // プロジェクト全体レポート
   const handleAiProjectReport = async () => {
-    if (!project) return;
     setAiContext(`プロジェクト分析レポート: ${project.name}`);
     setAiResult("");
     setAiDialogOpen(true);
@@ -121,20 +118,6 @@ export const ProjectDetailView = () => {
       setAiLoading(false);
     }
   };
-
-  // プロジェクトが見つからない場合
-  if (!project) {
-    return (
-      <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
-        <Container maxWidth="lg" sx={{ mt: 4 }}>
-          <Typography variant="h5">プロジェクトが見つかりません</Typography>
-          <Link href="/projects" style={{ textDecoration: "none" }}>
-            <Button sx={{ mt: 2 }}>プロジェクト一覧に戻る</Button>
-          </Link>
-        </Container>
-      </Box>
-    );
-  }
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>

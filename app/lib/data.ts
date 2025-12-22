@@ -75,6 +75,23 @@ function convertToUIProject(p: ProjectWithPackages): Project {
   };
 }
 
+// 単一プロジェクトを ID で取得
+export async function getProjectById(id: string): Promise<Project | null> {
+  const project = await prisma.project.findUnique({
+    where: { id },
+    include: {
+      packages: {
+        include: {
+          vulnerability: true,
+        },
+      },
+    },
+  });
+
+  if (!project) return null;
+  return convertToUIProject(project);
+}
+
 export async function getTeams() {
   return await prisma.team.findMany({
     orderBy: {
