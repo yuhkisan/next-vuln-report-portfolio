@@ -16,9 +16,10 @@ Next.js で構築された SBOM（Software Bill of Materials）脆弱性スキ�
 
 ## 🛠️ 技術スタック
 
-- **フレームワーク**: [Next.js 14](https://nextjs.org/) (App Router)
+- **フレームワーク**: [Next.js 16](https://nextjs.org/) (App Router)
 - **言語**: TypeScript
-- **UI ライブラリ**: [Material-UI (MUI)](https://mui.com/)
+- **UI ライブラリ**: [Material-UI (MUI) v7](https://mui.com/)
+- **ORM**: [Prisma v7](https://www.prisma.io/) (SQLite)
 - **アイコン**: [Lucide React](https://lucide.dev/)
 - **AI**: Google Gemini API (オプション)
 
@@ -68,13 +69,35 @@ cd vuln-app
 npm install
 ```
 
-3. 開発サーバーを起動
+3. 環境変数の設定
+
+プロジェクトルートに `.env` ファイルを作成し、以下を設定します。
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+4. データベースのセットアップ
+
+Prisma を使用して SQLite データベースを作成し、初期データを投入します。
+
+```bash
+# データベースの作成（マイグレーション適用 & クライアント生成）
+npx prisma migrate dev --name init
+
+# シードデータの投入
+npm run db:seed
+```
+
+5. 開発サーバーを起動
 
 ```bash
 npm run dev
 ```
 
-4. ブラウザで http://localhost:3000 を開く
+6. ブラウザで http://localhost:3000 を開く
+
+> **Note**: データベースの中身を確認したい場合は `npm run db:studio` を実行してください。
 
 ## 🔧 ビルドとデプロイ
 
@@ -116,7 +139,17 @@ npm start
 - プロジェクト全体の「AI リスク分析」ボタンをクリック
 - Gemini AI による詳細な分析結果を表示
 
-## 🔑 環境変数（オプション）
+## 🔑 環境変数
+
+### 必須
+
+`.env` ファイルに以下を設定してください。
+
+```env
+DATABASE_URL="file:./dev.db"
+```
+
+### オプション (Gemini API)
 
 Gemini API を使用する場合は、`app/lib/gemini.ts`内の`apiKey`を設定してください。
 
