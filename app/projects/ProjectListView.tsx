@@ -1,75 +1,19 @@
-"use client";
-
-import React, { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Grid,
-  Paper,
-  Menu,
-  MenuItem,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
-import { Search, Settings, UploadCloud, Edit2, Trash2 } from "lucide-react";
-import { useApp } from "../contexts/AppContext";
+import { Box, Container, Grid, Typography, Paper, Button } from "@mui/material";
+import { UploadCloud } from "lucide-react";
+import { getProjects, getTeams } from "../lib/data";
+import { HeaderActions } from "./HeaderActions";
 import { ProjectCard } from "./ProjectCard";
-import type { Project, Team } from "../types";
 
-type Props = {
-  initialProjects?: Project[];
-  initialTeams?: Team[];
-};
+export const ProjectListView = async () => {
+  const projects = await getProjects();
+  const teams = await getTeams();
 
-export const ProjectListView = ({ initialProjects, initialTeams }: Props) => {
-  const router = useRouter();
-  const {
-    currentTeam,
-    filteredProjects,
-    projects,
-    setProjects,
-    setTeams,
-    showNotification,
-  } = useApp();
-
-  // DBからの初期データをContextに反映
-  React.useEffect(() => {
-    if (initialTeams && initialTeams.length > 0) {
-      setTeams(initialTeams);
-    }
-    if (initialProjects) {
-      setProjects(initialProjects);
-    }
-  }, [initialTeams, initialProjects, setTeams, setProjects]);
-
-  // プロジェクトメニュー
-  const [projectMenuAnchor, setProjectMenuAnchor] =
-    useState<null | HTMLElement>(null);
-  const [menuProject, setMenuProject] = useState<Project | null>(null);
-  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
-  const [newName, setNewName] = useState("");
-
-  const handleRenameSubmit = () => {
-    if (menuProject && newName.trim()) {
-      setProjects(
-        projects.map((p) =>
-          p.id === menuProject.id ? { ...p, name: newName } : p
-        )
-      );
-      showNotification(`プロジェクト名を更新しました`);
-      setIsRenameDialogOpen(false);
-      setMenuProject(null);
-    }
-  };
+  // TODO: 本来はユーザーの選択チームをサーバーサイド（Cookie/DB）で管理すべき
+  // ここでは渡されたチームの先頭をカレントとする
+  const currentTeam =
+    teams.length > 0 ? teams[0] : { id: "unknown", name: "Unknown" };
+  const filteredProjects = projects.filter((p) => p.teamId === currentTeam.id);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
@@ -91,21 +35,9 @@ export const ProjectListView = ({ initialProjects, initialTeams }: Props) => {
               {filteredProjects.length} プロジェクト
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <Button startIcon={<Search size={18} />} color="inherit">
-              検索
-            </Button>
-            <Button
-              startIcon={<Settings size={18} />}
-              color="inherit"
-              onClick={() => router.push("/settings")}
-            >
-              設定
-            </Button>
-          </Box>
+          <HeaderActions />
         </Box>
 
-        {/* プロジェクト一覧 or 空状態 */}
         {filteredProjects.length > 0 ? (
           <Grid container spacing={3}>
             {filteredProjects.map((project) => (
@@ -117,27 +49,14 @@ export const ProjectListView = ({ initialProjects, initialTeams }: Props) => {
                       : "#"
                   }
                   style={{ textDecoration: "none" }}
-                  onClick={(e) => {
-                    if (project.status !== "completed") {
-                      e.preventDefault();
-                    }
-                  }}
                 >
-                  <ProjectCard
-                    project={project}
-                    onClick={() => {}} // Link で遷移するのでここは空
-                    onMenuClick={(e, p) => {
-                      e.stopPropagation();
-                      e.preventDefault();
-                      setMenuProject(p);
-                      setProjectMenuAnchor(e.currentTarget as HTMLElement);
-                    }}
-                  />
+                  <ProjectCard project={project} />
                 </Link>
               </Grid>
             ))}
           </Grid>
         ) : (
+          /* 空の状態 */
           <Paper
             variant="outlined"
             sx={{
@@ -200,68 +119,6 @@ export const ProjectListView = ({ initialProjects, initialTeams }: Props) => {
             </Link>
           </Paper>
         )}
-
-        {/* プロジェクトメニュー */}
-        <Menu
-          anchorEl={projectMenuAnchor}
-          open={Boolean(projectMenuAnchor)}
-          onClose={() => setProjectMenuAnchor(null)}
-        >
-          <MenuItem
-            onClick={() => {
-              setNewName(menuProject?.name || "");
-              setIsRenameDialogOpen(true);
-              setProjectMenuAnchor(null);
-            }}
-          >
-            <ListItemIcon>
-              <Edit2 size={16} />
-            </ListItemIcon>
-            <ListItemText primary="名前を変更" />
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              if (menuProject) {
-                setProjects(projects.filter((p) => p.id !== menuProject.id));
-                showNotification("削除しました");
-                setProjectMenuAnchor(null);
-              }
-            }}
-            sx={{ color: "error.main" }}
-          >
-            <ListItemIcon>
-              <Trash2 size={16} color="#d32f2f" />
-            </ListItemIcon>
-            <ListItemText primary="削除" />
-          </MenuItem>
-        </Menu>
-
-        {/* 名前変更ダイアログ */}
-        <Dialog
-          open={isRenameDialogOpen}
-          onClose={() => setIsRenameDialogOpen(false)}
-        >
-          <DialogTitle>プロジェクト名を変更</DialogTitle>
-          <DialogContent sx={{ pt: 1 }}>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="プロジェクト名"
-              fullWidth
-              variant="outlined"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setIsRenameDialogOpen(false)}>
-              キャンセル
-            </Button>
-            <Button onClick={handleRenameSubmit} variant="contained">
-              保存
-            </Button>
-          </DialogActions>
-        </Dialog>
       </Container>
     </Box>
   );
