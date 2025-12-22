@@ -5,14 +5,14 @@ import { getProjects, getTeams } from "../lib/data";
 import { HeaderActions } from "./HeaderActions";
 import { ProjectCard } from "./ProjectCard";
 
-export const ProjectListView = async () => {
-  const projects = await getProjects();
-  const teams = await getTeams();
+export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
+  const [projects, teams] = await Promise.all([getProjects(), getTeams()]);
 
-  // TODO: 本来はユーザーの選択チームをサーバーサイド（Cookie/DB）で管理すべき
-  // ここでは渡されたチームの先頭をカレントとする
+  // URL で指定されたチームを使用、なければ先頭チームをデフォルトに
   const currentTeam =
-    teams.length > 0 ? teams[0] : { id: "unknown", name: "Unknown" };
+    teams.find((t) => t.id === teamId) ??
+    (teams.length > 0 ? teams[0] : { id: "unknown", name: "Unknown" });
+
   const filteredProjects = projects.filter((p) => p.teamId === currentTeam.id);
 
   return (
