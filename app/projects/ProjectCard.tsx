@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Card,
   CardContent,
@@ -6,7 +5,6 @@ import {
   Chip,
   Typography,
   Box,
-  IconButton,
   Skeleton,
   LinearProgress,
   Stack,
@@ -18,21 +16,15 @@ import {
   XCircle,
   ShieldAlert,
   AlertCircle,
-  MoreVertical,
 } from "lucide-react";
 import type { Project } from "../types";
+import { ProjectMenu } from "./ProjectMenu";
 
-type ProjectCardProps = {
+type Props = {
   project: Project;
-  onClick: () => void;
-  onMenuClick: (e: React.MouseEvent, project: Project) => void;
 };
 
-export const ProjectCard = ({
-  project,
-  onClick,
-  onMenuClick,
-}: ProjectCardProps) => {
+export const ProjectCard = ({ project }: Props) => {
   const isAnalyzing = project.status === "analyzing";
   const isFailed = project.status === "failed";
 
@@ -55,23 +47,21 @@ export const ProjectCard = ({
         },
       }}
     >
-      <IconButton
-        size="small"
-        onClick={(e) => onMenuClick(e, project)}
+      <Box
         sx={{
           position: "absolute",
           top: 8,
           right: 8,
           zIndex: 10,
           bgcolor: "rgba(255,255,255,0.8)",
+          borderRadius: "50%",
           "&:hover": { bgcolor: "white" },
         }}
       >
-        <MoreVertical size={18} />
-      </IconButton>
+        <ProjectMenu project={project} />
+      </Box>
 
       <CardActionArea
-        onClick={onClick}
         disabled={isAnalyzing || isFailed}
         sx={{
           height: "100%",
