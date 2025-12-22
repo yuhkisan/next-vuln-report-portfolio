@@ -5,11 +5,7 @@ import { getProjects, getTeams } from "../lib/data";
 import { HeaderActions } from "./HeaderActions";
 import { ProjectCard } from "./ProjectCard";
 
-type ProjectListViewProps = {
-  teamId?: string;
-};
-
-export const ProjectListView = async ({ teamId }: ProjectListViewProps) => {
+export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
   const [projects, teams] = await Promise.all([getProjects(), getTeams()]);
 
   // URL で指定されたチームを使用、なければ先頭チームをデフォルトに
