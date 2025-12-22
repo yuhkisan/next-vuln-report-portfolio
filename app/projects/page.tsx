@@ -1,5 +1,10 @@
 import { ProjectListView } from "./ProjectListView";
 
-export default function ProjectsPage() {
-  return <ProjectListView />;
+type PageProps = {
+  searchParams: Promise<{ teamId?: string }>;
+};
+
+export default async function ProjectsPage({ searchParams }: PageProps) {
+  const { teamId } = await searchParams;
+  return <ProjectListView teamId={teamId} />;
 }
