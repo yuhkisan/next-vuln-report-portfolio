@@ -11,13 +11,8 @@ import type { Project } from "./types";
 
 export default function UploadPage() {
   const router = useRouter();
-  const {
-    currentTeam,
-    currentTeamId,
-    projects,
-    setProjects,
-    showNotification,
-  } = useApp();
+  const { currentTeam, currentTeamId, setProjects, showNotification } =
+    useApp();
 
   const handleUpload = (file: File) => {
     const newProjectId = `proj-${Date.now()}`;
@@ -54,13 +49,13 @@ export default function UploadPage() {
               ...p,
               status: "completed",
               vulnerabilities: generateMockVulnerabilities(
-                Math.floor(Math.random() * 15) + 1
+                Math.floor(Math.random() * 15) + 1,
               ),
               pkgCount: Math.floor(Math.random() * 200) + 50,
             };
           }
           return p;
-        })
+        }),
       );
       if (shouldFail) showNotification("解析に失敗しました");
     }, 3000);

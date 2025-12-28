@@ -182,7 +182,7 @@ export const ProjectCard = ({ project }: Props) => {
               </Box>
               <Box sx={{ display: "flex", gap: 0.5, mt: 2 }}>
                 {project.vulnerabilities.some(
-                  (v) => v.severity === "Critical"
+                  (v) => v.severity === "Critical",
                 ) && (
                   <Box
                     sx={{
@@ -206,7 +206,7 @@ export const ProjectCard = ({ project }: Props) => {
                   />
                 )}
                 {project.vulnerabilities.some(
-                  (v) => v.severity === "Medium"
+                  (v) => v.severity === "Medium",
                 ) && (
                   <Box
                     sx={{

@@ -112,10 +112,7 @@ export const ProjectDetailView = async ({
         </Paper>
 
         {/* 脆弱性セクション (Client Component) */}
-        <VulnerabilitySection
-          vulnerabilities={project.vulnerabilities}
-          projectName={project.name}
-        />
+        <VulnerabilitySection vulnerabilities={project.vulnerabilities} />
       </Container>
     </Box>
   );
