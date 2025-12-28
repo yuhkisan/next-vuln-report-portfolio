@@ -1,63 +1,52 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Box, Container, Chip } from "@mui/material";
+import {
+  Box,
+  Container,
+  Chip,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { Building } from "lucide-react";
 import { useApp } from "./contexts/AppContext";
 import { UploadArea } from "./UploadArea";
-import { generateMockVulnerabilities } from "./lib/mockData";
-import type { Project } from "./types";
 
 export default function UploadPage() {
   const router = useRouter();
-  const { currentTeam, currentTeamId, setProjects, showNotification } =
-    useApp();
+  const { currentTeam, currentTeamId, showNotification } = useApp();
+  const [isUploading, setIsUploading] = useState(false);
 
-  const handleUpload = (file: File) => {
-    const newProjectId = `proj-${Date.now()}`;
-    const shouldFail = file.name.toLowerCase().includes("error");
+  const handleUpload = async (file: File) => {
+    setIsUploading(true);
 
-    const newProject: Project = {
-      id: newProjectId,
-      teamId: currentTeamId,
-      name: file.name.split(".")[0] || "Unknown",
-      fileName: file.name,
-      uploadDate: new Date(),
-      status: "analyzing",
-      vulnerabilities: [],
-      pkgCount: 0,
-    };
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("teamId", currentTeamId);
 
-    setProjects((prev) => [newProject, ...prev]);
-    router.push("/projects");
-    showNotification("アップロード完了。解析を開始しました。");
+      const response = await fetch("/api/scans", {
+        method: "POST",
+        body: formData,
+      });
 
-    setTimeout(() => {
-      setProjects((prev) =>
-        prev.map((p) => {
-          if (p.id === newProjectId) {
-            if (shouldFail)
-              return {
-                ...p,
-                status: "failed",
-                errorMessage:
-                  "解析エラー: 不正なJSONフォーマット、またはSBOMファイルが破損しています。",
-              };
-            return {
-              ...p,
-              status: "completed",
-              vulnerabilities: generateMockVulnerabilities(
-                Math.floor(Math.random() * 15) + 1,
-              ),
-              pkgCount: Math.floor(Math.random() * 200) + 50,
-            };
-          }
-          return p;
-        }),
+      const result = await response.json();
+
+      if (!response.ok) {
+        showNotification(result.error || "アップロードに失敗しました");
+        setIsUploading(false);
+        return;
+      }
+
+      showNotification(
+        `解析完了: ${result.vulnerabilityCount}件の脆弱性が見つかりました`,
       );
-      if (shouldFail) showNotification("解析に失敗しました");
-    }, 3000);
+      router.push(`/projects/${result.projectId}`);
+    } catch {
+      showNotification("ネットワークエラーが発生しました");
+      setIsUploading(false);
+    }
   };
 
   return (
@@ -72,7 +61,16 @@ export default function UploadPage() {
               variant="outlined"
             />
           </Box>
-          <UploadArea onUpload={handleUpload} />
+          {isUploading ? (
+            <Box sx={{ textAlign: "center", py: 8 }}>
+              <CircularProgress size={48} />
+              <Typography sx={{ mt: 2 }} color="text.secondary">
+                解析中...
+              </Typography>
+            </Box>
+          ) : (
+            <UploadArea onUpload={handleUpload} />
+          )}
         </Box>
       </Container>
     </Box>
