@@ -19,7 +19,7 @@ export async function callGeminiAPI(prompt: string): Promise<string> {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] }),
-      }
+      },
     );
     if (!response.ok) throw new Error(`API Error: ${response.status}`);
     const data = await response.json();

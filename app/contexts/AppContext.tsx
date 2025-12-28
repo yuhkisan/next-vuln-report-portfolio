@@ -30,7 +30,7 @@ type AppContextType = {
   snackbarMessage: string;
   handleCloseNotification: (
     event?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => void;
 };
 
@@ -97,7 +97,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const handleCloseNotification = (
     _?: React.SyntheticEvent | Event,
-    reason?: string
+    reason?: string,
   ) => {
     if (reason !== "clickaway") setSnackbarOpen(false);
   };

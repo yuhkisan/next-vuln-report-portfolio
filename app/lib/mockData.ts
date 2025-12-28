@@ -18,7 +18,7 @@ export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
       id: `vuln-${i}`,
       packageName: pkg,
       version: `${Math.floor(Math.random() * 5)}.${Math.floor(
-        Math.random() * 10
+        Math.random() * 10,
       )}.${Math.floor(Math.random() * 10)}`,
       severity,
       cve: `CVE-202${Math.floor(Math.random() * 4) + 1}-${
