@@ -10,8 +10,6 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@typescript-eslint/no-unused-vars": "error",
-      // TODO: Issue #20 完了後に error に変更
-      "react-hooks/set-state-in-effect": "warn",
     },
   },
   globalIgnores([

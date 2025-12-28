@@ -1,16 +1,9 @@
 "use client";
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, ReactNode } from "react";
 import type { Team, Project } from "../types";
 import { generateMockVulnerabilities } from "../lib/mockData";
 
-// Context の型定義
 type AppContextType = {
   // チーム関連
   teams: Team[];
@@ -36,9 +29,30 @@ type AppContextType = {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Provider コンポーネント
+const INITIAL_PROJECTS: Project[] = [
+  {
+    id: "demo-1",
+    teamId: "team-1",
+    name: "Frontend-App-v1.0",
+    fileName: "sbom-frontend.json",
+    uploadDate: new Date("2024-01-01T10:00:00"),
+    status: "completed",
+    vulnerabilities: generateMockVulnerabilities(5),
+    pkgCount: 124,
+  },
+  {
+    id: "demo-2",
+    teamId: "team-2",
+    name: "Backend-API-v2.3",
+    fileName: "sbom-backend.json",
+    uploadDate: new Date("2024-01-02T15:30:00"),
+    status: "completed",
+    vulnerabilities: generateMockVulnerabilities(12),
+    pkgCount: 89,
+  },
+];
+
 export function AppProvider({ children }: { children: ReactNode }) {
-  // チーム状態
   const [teams, setTeams] = useState<Team[]>([
     { id: "team-1", name: "My Workspace" },
     { id: "team-2", name: "DevOps Team" },
@@ -52,44 +66,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
   const [currentTeamId, setCurrentTeamId] = useState("team-1");
 
-  // プロジェクト状態
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
 
-  // 通知状態
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // 初期データ
-  useEffect(() => {
-    setProjects([
-      {
-        id: "demo-1",
-        teamId: "team-1",
-        name: "Frontend-App-v1.0",
-        fileName: "sbom-frontend.json",
-        uploadDate: new Date(Date.now() - 86400000),
-        status: "completed",
-        vulnerabilities: generateMockVulnerabilities(5),
-        pkgCount: 124,
-      },
-      {
-        id: "demo-2",
-        teamId: "team-2",
-        name: "Backend-API-v2.3",
-        fileName: "sbom-backend.json",
-        uploadDate: new Date(Date.now() - 172800000),
-        status: "completed",
-        vulnerabilities: generateMockVulnerabilities(12),
-        pkgCount: 89,
-      },
-    ]);
-  }, []);
-
-  // 計算値
   const currentTeam = teams.find((t) => t.id === currentTeamId) || teams[0];
   const filteredProjects = projects.filter((p) => p.teamId === currentTeamId);
 
-  // 通知関数
   const showNotification = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarOpen(true);
@@ -124,7 +108,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
   );
 }
 
-// フック
 export function useApp() {
   const context = useContext(AppContext);
   if (context === undefined) {
