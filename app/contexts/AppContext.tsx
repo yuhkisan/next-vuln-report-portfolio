@@ -1,23 +1,15 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { Team, Project } from "../types";
-import { generateMockVulnerabilities } from "../lib/mockData";
+import type { Team } from "../types";
 
 type AppContextType = {
-  // チーム関連
   teams: Team[];
   setTeams: React.Dispatch<React.SetStateAction<Team[]>>;
   currentTeamId: string;
   setCurrentTeamId: React.Dispatch<React.SetStateAction<string>>;
   currentTeam: Team;
 
-  // プロジェクト関連
-  projects: Project[];
-  setProjects: React.Dispatch<React.SetStateAction<Project[]>>;
-  filteredProjects: Project[];
-
-  // 通知
   showNotification: (message: string) => void;
   snackbarOpen: boolean;
   snackbarMessage: string;
@@ -28,29 +20,6 @@ type AppContextType = {
 };
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
-
-const INITIAL_PROJECTS: Project[] = [
-  {
-    id: "demo-1",
-    teamId: "team-1",
-    name: "Frontend-App-v1.0",
-    fileName: "sbom-frontend.json",
-    uploadDate: new Date("2024-01-01T10:00:00"),
-    status: "completed",
-    vulnerabilities: generateMockVulnerabilities(5),
-    pkgCount: 124,
-  },
-  {
-    id: "demo-2",
-    teamId: "team-2",
-    name: "Backend-API-v2.3",
-    fileName: "sbom-backend.json",
-    uploadDate: new Date("2024-01-02T15:30:00"),
-    status: "completed",
-    vulnerabilities: generateMockVulnerabilities(12),
-    pkgCount: 89,
-  },
-];
 
 export function AppProvider({ children }: { children: ReactNode }) {
   const [teams, setTeams] = useState<Team[]>([
@@ -66,13 +35,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   ]);
   const [currentTeamId, setCurrentTeamId] = useState("team-1");
 
-  const [projects, setProjects] = useState<Project[]>(INITIAL_PROJECTS);
-
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const currentTeam = teams.find((t) => t.id === currentTeamId) || teams[0];
-  const filteredProjects = projects.filter((p) => p.teamId === currentTeamId);
 
   const showNotification = (message: string) => {
     setSnackbarMessage(message);
@@ -94,9 +60,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         currentTeamId,
         setCurrentTeamId,
         currentTeam,
-        projects,
-        setProjects,
-        filteredProjects,
         showNotification,
         snackbarOpen,
         snackbarMessage,
