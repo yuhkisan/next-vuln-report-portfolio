@@ -33,7 +33,6 @@ export default function UploadPage() {
     router.push("/projects");
     showNotification("アップロード完了。解析を開始しました。");
 
-    // 解析シミュレーション
     setTimeout(() => {
       setProjects((prev) =>
         prev.map((p) => {
