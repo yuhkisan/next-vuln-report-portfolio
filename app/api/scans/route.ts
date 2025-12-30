@@ -6,25 +6,46 @@ import { findVulnerabilities } from "@/app/lib/fixtures/vulnDb";
 type PackageJsonDeps = Record<string, string>;
 
 type PackageJsonContent = {
-  name?: string;
   dependencies?: PackageJsonDeps;
   devDependencies?: PackageJsonDeps;
 };
 
-function parsePackageJson(content: string): Array<{
+type PackageLockPackage = {
+  name?: string;
+  version?: string;
+  dependencies?: PackageJsonDeps;
+  devDependencies?: PackageJsonDeps;
+};
+
+type PackageLockContent = {
+  lockfileVersion?: number;
+  packages?: Record<string, PackageLockPackage>;
+};
+
+type ParsedPackage = {
   name: string;
   version: string;
   isDirect: boolean;
-}> {
-  let parsed: PackageJsonContent;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    return [];
-  }
+};
 
-  const result: Array<{ name: string; version: string; isDirect: boolean }> =
-    [];
+const dedupePackages = (packages: ParsedPackage[]) => {
+  const map = new Map<string, ParsedPackage>();
+  for (const pkg of packages) {
+    const key = `${pkg.name}@${pkg.version}`;
+    const existing = map.get(key);
+    if (!existing) {
+      map.set(key, pkg);
+      continue;
+    }
+    if (pkg.isDirect && !existing.isDirect) {
+      map.set(key, { ...existing, isDirect: true });
+    }
+  }
+  return Array.from(map.values());
+};
+
+const parsePackageJsonContent = (parsed: PackageJsonContent): ParsedPackage[] => {
+  const result: ParsedPackage[] = [];
 
   const processDeps = (deps: PackageJsonDeps | undefined) => {
     if (!deps) return;
@@ -43,7 +64,51 @@ function parsePackageJson(content: string): Array<{
   processDeps(parsed.dependencies);
   processDeps(parsed.devDependencies);
 
-  return result;
+  return dedupePackages(result);
+};
+
+const parsePackageLockContent = (
+  parsed: PackageLockContent,
+): ParsedPackage[] => {
+  const lockfileVersion = parsed.lockfileVersion ?? 0;
+  if (lockfileVersion !== 2 && lockfileVersion !== 3) return [];
+
+  const packages = parsed.packages;
+  if (!packages) return [];
+
+  const root = packages[""];
+  const directNames = new Set<string>([
+    ...Object.keys(root?.dependencies ?? {}),
+    ...Object.keys(root?.devDependencies ?? {}),
+  ]);
+
+  const result: ParsedPackage[] = [];
+  for (const [pkgPath, pkg] of Object.entries(packages)) {
+    if (pkgPath === "") continue;
+    if (!pkg.name || !pkg.version) continue;
+    result.push({
+      name: pkg.name,
+      version: pkg.version,
+      isDirect: directNames.has(pkg.name),
+    });
+  }
+
+  return dedupePackages(result);
+};
+
+function parsePackageContent(content: string): ParsedPackage[] {
+  let parsed: PackageJsonContent | PackageLockContent;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    return [];
+  }
+
+  if ("lockfileVersion" in parsed) {
+    return parsePackageLockContent(parsed as PackageLockContent);
+  }
+
+  return parsePackageJsonContent(parsed as PackageJsonContent);
 }
 
 export async function POST(request: NextRequest) {
@@ -60,11 +125,11 @@ export async function POST(request: NextRequest) {
     }
 
     const content = await file.text();
-    const packages = parsePackageJson(content);
+    const packages = parsePackageContent(content);
 
     if (packages.length === 0) {
       return NextResponse.json(
-        { error: "Invalid package.json or no dependencies found" },
+        { error: "Invalid package file or no dependencies found" },
         { status: 400 },
       );
     }
