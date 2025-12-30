@@ -28,6 +28,15 @@ type ParsedPackage = {
   isDirect: boolean;
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const isPackageLockContent = (value: unknown): value is PackageLockContent =>
+  isRecord(value) && "lockfileVersion" in value;
+
+const isPackageJsonContent = (value: unknown): value is PackageJsonContent =>
+  isRecord(value) && ("dependencies" in value || "devDependencies" in value);
+
 const dedupePackages = (packages: ParsedPackage[]) => {
   const map = new Map<string, ParsedPackage>();
   for (const pkg of packages) {
@@ -42,6 +51,20 @@ const dedupePackages = (packages: ParsedPackage[]) => {
     }
   }
   return Array.from(map.values());
+};
+
+const getDirectDependencyNames = (root: PackageLockPackage | undefined) =>
+  new Set<string>([
+    ...Object.keys(root?.dependencies ?? {}),
+    ...Object.keys(root?.devDependencies ?? {}),
+  ]);
+
+const getPackageNameFromPath = (pkgPath: string) => {
+  const marker = "node_modules/";
+  const index = pkgPath.lastIndexOf(marker);
+  if (index === -1) return null;
+  const name = pkgPath.slice(index + marker.length);
+  return name || null;
 };
 
 const parsePackageJsonContent = (parsed: PackageJsonContent): ParsedPackage[] => {
@@ -70,26 +93,25 @@ const parsePackageJsonContent = (parsed: PackageJsonContent): ParsedPackage[] =>
 const parsePackageLockContent = (
   parsed: PackageLockContent,
 ): ParsedPackage[] => {
-  const lockfileVersion = parsed.lockfileVersion ?? 0;
+  const lockfileVersion =
+    typeof parsed.lockfileVersion === "number" ? parsed.lockfileVersion : 0;
   if (lockfileVersion !== 2 && lockfileVersion !== 3) return [];
 
   const packages = parsed.packages;
   if (!packages) return [];
 
-  const root = packages[""];
-  const directNames = new Set<string>([
-    ...Object.keys(root?.dependencies ?? {}),
-    ...Object.keys(root?.devDependencies ?? {}),
-  ]);
+  const directNames = getDirectDependencyNames(packages[""]);
 
   const result: ParsedPackage[] = [];
   for (const [pkgPath, pkg] of Object.entries(packages)) {
     if (pkgPath === "") continue;
-    if (!pkg.name || !pkg.version) continue;
+    if (!pkg.version) continue;
+    const name = pkg.name ?? getPackageNameFromPath(pkgPath);
+    if (!name) continue;
     result.push({
-      name: pkg.name,
+      name,
       version: pkg.version,
-      isDirect: directNames.has(pkg.name),
+      isDirect: directNames.has(name),
     });
   }
 
@@ -97,18 +119,22 @@ const parsePackageLockContent = (
 };
 
 function parsePackageContent(content: string): ParsedPackage[] {
-  let parsed: PackageJsonContent | PackageLockContent;
+  let parsed: unknown;
   try {
     parsed = JSON.parse(content);
   } catch {
     return [];
   }
 
-  if ("lockfileVersion" in parsed) {
-    return parsePackageLockContent(parsed as PackageLockContent);
+  if (isPackageLockContent(parsed)) {
+    return parsePackageLockContent(parsed);
   }
 
-  return parsePackageJsonContent(parsed as PackageJsonContent);
+  if (isPackageJsonContent(parsed)) {
+    return parsePackageJsonContent(parsed);
+  }
+
+  return [];
 }
 
 export async function POST(request: NextRequest) {
