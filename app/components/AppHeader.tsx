@@ -1,4 +1,4 @@
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import Link from "next/link";
 import { AppBar, Toolbar, Button, Box } from "@mui/material";
 import { UploadCloud } from "lucide-react";

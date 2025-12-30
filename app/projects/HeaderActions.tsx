@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useRouter } from "next/navigation";
 import { Box, Button } from "@mui/material";
 import { Search, Settings } from "lucide-react";

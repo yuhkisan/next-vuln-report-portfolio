@@ -2,16 +2,20 @@ import { defineConfig, globalIgnores } from "eslint/config";
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import prettier from "eslint-config-prettier/flat";
+import unusedImports from "eslint-plugin-unused-imports";
+import react from "eslint-plugin-react";
 
-const eslintConfig = defineConfig([
+export default defineConfig([
   ...nextVitals,
   ...nextTs,
-  prettier,
+  react.configs.flat["jsx-runtime"],
   {
+    plugins: { "unused-imports": unusedImports },
     rules: {
-      "@typescript-eslint/no-unused-vars": "error",
+      "unused-imports/no-unused-imports": "error",
     },
   },
+  prettier,
   globalIgnores([
     ".next/**",
     "out/**",
@@ -20,5 +24,3 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
   ]),
 ]);
-
-export default eslintConfig;
