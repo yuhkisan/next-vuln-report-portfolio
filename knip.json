@@ -1,11 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@latest/schema.json",
-  "entry": ["app/**/*.{ts,tsx}", "tests/**/*.test.ts"],
+  "entry": ["app/**/*.{ts,tsx}", "tests/**/*.{test,spec}.{ts,tsx}"],
   "project": [
     "app/**/*.{ts,tsx}",
     "lib/**/*.ts",
     "prisma/**/*.ts",
-    "tests/**/*.ts",
+    "tests/**/*.{ts,tsx}",
     "vitest.config.ts"
   ],
   "ignore": ["**/*.d.ts", "generated/**"],
