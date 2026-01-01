@@ -123,6 +123,10 @@ npm start
 
 詳細は `docs/USER_MANUAL.md` を参照してください。
 
+関連ドキュメント:
+- `docs/USER_MANUAL.md`（操作マニュアル）
+- `docs/BEHAVIOR_SPEC.md`（挙動仕様）
+
 ## 🔑 環境変数
 
 ### 必須
