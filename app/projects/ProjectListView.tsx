@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { Box, Container, Grid, Typography, Paper, Button } from "@mui/material";
 import { UploadCloud } from "lucide-react";
 import { getProjects, getTeams } from "../lib/data";
@@ -35,7 +36,9 @@ export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
               {filteredProjects.length} プロジェクト
             </Typography>
           </Box>
-          <HeaderActions />
+          <Suspense fallback={<Box />}>
+            <HeaderActions />
+          </Suspense>
         </Box>
 
         {filteredProjects.length > 0 ? (
