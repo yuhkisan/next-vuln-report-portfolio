@@ -1,9 +1,21 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 import { NextRequest } from "next/server";
 
-import { POST } from "../route";
+vi.mock("@/lib/prisma", () => ({
+  prisma: {
+    project: {
+      create: vi.fn(),
+    },
+  },
+}));
 
 type ErrorResponse = { error: string };
+
+let POST: typeof import("../route").POST;
+
+beforeAll(async () => {
+  ({ POST } = await import("../route"));
+});
 
 const buildRequest = (formData: FormData) =>
   new NextRequest("http://localhost/api/scans", {
