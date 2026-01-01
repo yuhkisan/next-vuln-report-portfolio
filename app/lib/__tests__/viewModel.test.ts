@@ -19,6 +19,7 @@ describe("convertToProjectViewModel", () => {
           name: "left-pad",
           version: "1.3.0",
           dependencyType: "prod",
+          isDirect: true,
           vulnerability: {
             id: "vuln-1",
             severity: "HIGH",
@@ -30,12 +31,14 @@ describe("convertToProjectViewModel", () => {
           name: "no-vuln",
           version: "2.0.0",
           dependencyType: "dev",
+          isDirect: true,
           vulnerability: null,
         },
         {
           name: "legacy",
           version: "0.9.0",
           dependencyType: "dev",
+          isDirect: true,
           vulnerability: {
             id: "vuln-2",
             severity: "low",
@@ -55,6 +58,7 @@ describe("convertToProjectViewModel", () => {
         version: "1.3.0",
         severity: "High",
         dependencyType: "prod",
+        rootDependency: "left-pad",
         cve: "CVE-2024-0001",
         description: "desc",
       },
@@ -64,6 +68,7 @@ describe("convertToProjectViewModel", () => {
         version: "0.9.0",
         severity: "Low",
         dependencyType: "dev",
+        rootDependency: "legacy",
         cve: "N/A",
         description: "desc2",
       },
