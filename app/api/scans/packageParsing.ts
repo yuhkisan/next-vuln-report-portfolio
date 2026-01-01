@@ -10,6 +10,7 @@ type PackageJsonContent = {
 type PackageLockPackage = {
   name?: string;
   version?: string;
+  dev?: boolean;
   dependencies?: PackageJsonDeps;
   devDependencies?: PackageJsonDeps;
 };
@@ -19,10 +20,13 @@ type PackageLockContent = {
   packages?: Record<string, PackageLockPackage>;
 };
 
+type DependencyType = "prod" | "dev";
+
 export type ParsedPackage = {
   name: string;
   version: string;
   isDirect: boolean;
+  dependencyType: DependencyType;
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -43,18 +47,18 @@ const dedupePackages = (packages: ParsedPackage[]) => {
       map.set(key, pkg);
       continue;
     }
-    if (pkg.isDirect && !existing.isDirect) {
-      map.set(key, { ...existing, isDirect: true });
-    }
+    const isDirect = existing.isDirect || pkg.isDirect;
+    const dependencyType =
+      existing.dependencyType === "prod" || pkg.dependencyType === "prod"
+        ? "prod"
+        : "dev";
+    map.set(key, { ...existing, isDirect, dependencyType });
   }
   return Array.from(map.values());
 };
 
-const getDirectDependencyNames = (root: PackageLockPackage | undefined) =>
-  new Set<string>([
-    ...Object.keys(root?.dependencies ?? {}),
-    ...Object.keys(root?.devDependencies ?? {}),
-  ]);
+const getDependencyNames = (deps: PackageJsonDeps | undefined) =>
+  new Set<string>(Object.keys(deps ?? {}));
 
 const getPackageNameFromPath = (pkgPath: string) => {
   const marker = "node_modules/";
@@ -67,13 +71,21 @@ const getPackageNameFromPath = (pkgPath: string) => {
 const parsePackageJsonContent = (parsed: PackageJsonContent): ParsedPackage[] => {
   const result: ParsedPackage[] = [];
 
-  const processDeps = (deps: PackageJsonDeps | undefined) => {
+  const processDeps = (
+    deps: PackageJsonDeps | undefined,
+    dependencyType: DependencyType,
+  ) => {
     if (!deps) return;
     for (const [name, range] of Object.entries(deps)) {
       try {
         const resolved = minVersion(range);
         if (resolved) {
-          result.push({ name, version: resolved.version, isDirect: true });
+          result.push({
+            name,
+            version: resolved.version,
+            isDirect: true,
+            dependencyType,
+          });
         }
       } catch {
         // skip invalid version ranges
@@ -81,8 +93,8 @@ const parsePackageJsonContent = (parsed: PackageJsonContent): ParsedPackage[] =>
     }
   };
 
-  processDeps(parsed.dependencies);
-  processDeps(parsed.devDependencies);
+  processDeps(parsed.dependencies, "prod");
+  processDeps(parsed.devDependencies, "dev");
 
   return dedupePackages(result);
 };
@@ -97,7 +109,10 @@ const parsePackageLockContent = (
   const packages = parsed.packages;
   if (!packages) return [];
 
-  const directNames = getDirectDependencyNames(packages[""]);
+  const root = packages[""];
+  const prodNames = getDependencyNames(root?.dependencies);
+  const devNames = getDependencyNames(root?.devDependencies);
+  const directNames = new Set<string>([...prodNames, ...devNames]);
 
   const result: ParsedPackage[] = [];
   for (const [pkgPath, pkg] of Object.entries(packages)) {
@@ -105,10 +120,19 @@ const parsePackageLockContent = (
     if (!pkg.version) continue;
     const name = pkg.name ?? getPackageNameFromPath(pkgPath);
     if (!name) continue;
+    const isDirect = directNames.has(name);
+    const dependencyType: DependencyType = prodNames.has(name)
+      ? "prod"
+      : devNames.has(name)
+        ? "dev"
+        : pkg.dev
+          ? "dev"
+          : "prod";
     result.push({
       name,
       version: pkg.version,
-      isDirect: directNames.has(name),
+      isDirect,
+      dependencyType,
     });
   }
 

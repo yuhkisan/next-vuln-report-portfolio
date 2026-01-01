@@ -38,6 +38,7 @@ model Package {
   name      String
   version   String
   isDirect  Boolean  // package.jsonに直接書かれているか
+  dependencyType String @default("prod") // prod | dev
   projectId String
   project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
 

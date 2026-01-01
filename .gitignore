@@ -38,3 +38,6 @@ next-env.d.ts
 *.db-journal
 
 /generated
+
+# Local SQLite
+dev.db
