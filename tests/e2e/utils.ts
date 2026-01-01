@@ -8,9 +8,9 @@ const fixturesDir = resolve(currentDir, "..", "fixtures");
 
 export const getFixturePath = (name: string) => resolve(fixturesDir, name);
 
-export const createTempJsonFile = async (content: string) => {
+export const createTempFile = async (content: string, extension = "json") => {
   const dir = await fs.mkdtemp(join(tmpdir(), "vuln-e2e-"));
-  const filePath = join(dir, "temp.json");
+  const filePath = join(dir, `temp.${extension}`);
   await fs.writeFile(filePath, content, "utf8");
   return filePath;
 };
@@ -20,5 +20,5 @@ export const createOversizeJsonFile = async (
 ) => {
   const payload = "x".repeat(minSizeBytes);
   const content = JSON.stringify({ data: payload });
-  return createTempJsonFile(content);
+  return createTempFile(content, "json");
 };
