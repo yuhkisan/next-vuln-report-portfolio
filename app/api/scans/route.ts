@@ -45,6 +45,7 @@ export async function POST(request: NextRequest) {
               name: pkg.name,
               version: pkg.version,
               isDirect: pkg.isDirect,
+              dependencyType: pkg.dependencyType,
               ...(vuln && {
                 vulnerability: {
                   create: {

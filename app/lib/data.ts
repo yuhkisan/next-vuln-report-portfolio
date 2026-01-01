@@ -26,6 +26,7 @@ const toProjectApiResponse = (project: ProjectWithPackages): ProjectApiResponse 
   packages: project.packages.map((pkg) => ({
     name: pkg.name,
     version: pkg.version,
+    dependencyType: pkg.dependencyType as ProjectApiResponse["packages"][number]["dependencyType"],
     vulnerability: pkg.vulnerability
       ? {
           id: pkg.vulnerability.id,

@@ -2,6 +2,7 @@ import type { Vulnerability, Member, Severity } from "../types/viewModel";
 
 export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
   const severities: Severity[] = ["Critical", "High", "Medium", "Low"];
+  const dependencyTypes = ["prod", "dev"] as const;
   const packages = [
     "log4j-core",
     "react",
@@ -13,6 +14,8 @@ export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
   ];
   return Array.from({ length: count }).map((_, i) => {
     const severity = severities[Math.floor(Math.random() * severities.length)];
+    const dependencyType =
+      dependencyTypes[Math.floor(Math.random() * dependencyTypes.length)];
     const pkg = packages[Math.floor(Math.random() * packages.length)];
     return {
       id: `vuln-${i}`,
@@ -21,6 +24,7 @@ export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
         Math.random() * 10,
       )}.${Math.floor(Math.random() * 10)}`,
       severity,
+      dependencyType,
       cve: `CVE-202${Math.floor(Math.random() * 4) + 1}-${
         Math.floor(Math.random() * 10000) + 1000
       }`,

@@ -8,6 +8,8 @@ export type ScanResponse = {
   vulnerabilityCount: number;
 };
 
+export type DependencyType = "prod" | "dev";
+
 export type VulnerabilityApiResponse = {
   id: string;
   severity: string;
@@ -18,6 +20,7 @@ export type VulnerabilityApiResponse = {
 export type PackageApiResponse = {
   name: string;
   version: string;
+  dependencyType: DependencyType;
   vulnerability: VulnerabilityApiResponse | null;
 };
 

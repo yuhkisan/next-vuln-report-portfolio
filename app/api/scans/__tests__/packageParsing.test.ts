@@ -28,9 +28,24 @@ describe("parsePackageContent", () => {
 
     expect(sortPackages(result)).toEqual(
       sortPackages([
-        { name: "left-pad", version: "1.3.0", isDirect: true },
-        { name: "lodash", version: "4.17.21", isDirect: true },
-        { name: "typescript", version: "5.2.0", isDirect: true },
+        {
+          name: "left-pad",
+          version: "1.3.0",
+          isDirect: true,
+          dependencyType: "prod",
+        },
+        {
+          name: "lodash",
+          version: "4.17.21",
+          isDirect: true,
+          dependencyType: "prod",
+        },
+        {
+          name: "typescript",
+          version: "5.2.0",
+          isDirect: true,
+          dependencyType: "dev",
+        },
       ]),
     );
   });
@@ -43,6 +58,8 @@ describe("parsePackageContent", () => {
           name: "root",
           dependencies: {
             "left-pad": "^1.3.0",
+          },
+          devDependencies: {
             "@scope/pkg": "^2.0.0",
           },
         },
@@ -51,9 +68,11 @@ describe("parsePackageContent", () => {
         },
         "node_modules/@scope/pkg": {
           version: "2.1.0",
+          dev: true,
         },
         "node_modules/left-pad/node_modules/sub": {
           version: "0.1.0",
+          dev: true,
         },
       },
     });
@@ -62,9 +81,24 @@ describe("parsePackageContent", () => {
 
     expect(sortPackages(result)).toEqual(
       sortPackages([
-        { name: "left-pad", version: "1.3.0", isDirect: true },
-        { name: "@scope/pkg", version: "2.1.0", isDirect: true },
-        { name: "sub", version: "0.1.0", isDirect: false },
+        {
+          name: "left-pad",
+          version: "1.3.0",
+          isDirect: true,
+          dependencyType: "prod",
+        },
+        {
+          name: "@scope/pkg",
+          version: "2.1.0",
+          isDirect: true,
+          dependencyType: "dev",
+        },
+        {
+          name: "sub",
+          version: "0.1.0",
+          isDirect: false,
+          dependencyType: "dev",
+        },
       ]),
     );
   });

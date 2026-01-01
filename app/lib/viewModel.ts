@@ -1,4 +1,9 @@
-import type { Project, Severity, Vulnerability, VulnerabilitySummary } from "@/app/types/viewModel";
+import type {
+  Project,
+  Severity,
+  Vulnerability,
+  VulnerabilitySummary,
+} from "@/app/types/viewModel";
 import type { ProjectApiResponse } from "@/app/types/api";
 
 // 重要度文字列をUIの型に変換
@@ -45,6 +50,7 @@ export function convertToProjectViewModel(p: ProjectApiResponse): Project {
         packageName: pkg.name,
         version: pkg.version,
         severity: mapSeverity(v.severity),
+        dependencyType: pkg.dependencyType,
         cve: v.cve || "N/A",
         description: v.description,
       };

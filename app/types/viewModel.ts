@@ -1,10 +1,13 @@
 export type Severity = "Critical" | "High" | "Medium" | "Low";
 
+export type DependencyType = "prod" | "dev";
+
 export type Vulnerability = {
   id: string;
   packageName: string;
   version: string;
   severity: Severity;
+  dependencyType: DependencyType;
   cve: string;
   description: string;
 };
