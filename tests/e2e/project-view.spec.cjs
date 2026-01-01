@@ -1,29 +1,37 @@
-import { test, expect } from "@playwright/test";
-import { getFixturePath } from "./utils";
+const { test, expect } = require("@playwright/test");
+const { getFixturePath } = require("./utils.cjs");
+const { ensureTeams } = require("./db.cjs");
 
 const fixture = getFixturePath("package-lock.v3.json");
 
-const fileInput = (page: { locator: (selector: string) => any }) =>
+const fileInput = (page) =>
   page.locator('input[type="file"]');
 
-const vulnRows = (page: { locator: (selector: string, options?: any) => any }) =>
+const vulnRows = (page) =>
   page.locator("tbody tr", {
     has: page.getByRole("button", { name: "AI解説" }),
   });
 
 test("project list and detail interactions", async ({ page }) => {
-  await page.goto("/");
+  const [team] = ensureTeams(1);
+  await page.goto(`/?teamId=${team.id}`);
   await fileInput(page).setInputFiles(fixture);
 
   await expect(page.getByText("解析完了:", { exact: false })).toBeVisible();
   await expect(page).toHaveURL(/\/projects\//);
   const detailUrl = page.url();
+  const projectId = detailUrl.split("/").pop();
+  if (!projectId) throw new Error("Project ID not found");
 
-  await page.goto("/projects");
-  await expect(page.getByText("package-lock.v3")).toBeVisible();
+  await page.goto(`/projects?teamId=${team.id}`);
+  await expect(
+    page.locator(`a[href="/projects/${projectId}"]`),
+  ).toBeVisible();
 
   await page.goto(detailUrl);
-  await expect(page.getByText("Root Dependency:")).toBeVisible();
+  await expect(
+    page.getByText("Root Dependency:", { exact: false }).first(),
+  ).toBeVisible();
 
   const rows = vulnRows(page);
   await expect(rows).toHaveCount(5);
