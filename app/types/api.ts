@@ -20,6 +20,7 @@ export type VulnerabilityApiResponse = {
 export type PackageApiResponse = {
   name: string;
   version: string;
+  isDirect: boolean;
   dependencyType: DependencyType;
   vulnerability: VulnerabilityApiResponse | null;
 };

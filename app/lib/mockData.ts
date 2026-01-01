@@ -25,6 +25,7 @@ export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
       )}.${Math.floor(Math.random() * 10)}`,
       severity,
       dependencyType,
+      rootDependency: pkg,
       cve: `CVE-202${Math.floor(Math.random() * 4) + 1}-${
         Math.floor(Math.random() * 10000) + 1000
       }`,

@@ -39,8 +39,58 @@ const buildSummary = (vulnerabilities: Vulnerability[]): VulnerabilitySummary =>
   };
 };
 
+const hashString = (value: string) => {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return hash;
+};
+
+const buildRootDependencyPicker = (
+  packages: ProjectApiResponse["packages"],
+) => {
+  const directPackages = packages.filter((pkg) => pkg.isDirect);
+  const directAll = Array.from(
+    new Set(directPackages.map((pkg) => pkg.name)),
+  );
+  const directByType = {
+    prod: Array.from(
+      new Set(
+        directPackages
+          .filter((pkg) => pkg.dependencyType === "prod")
+          .map((pkg) => pkg.name),
+      ),
+    ),
+    dev: Array.from(
+      new Set(
+        directPackages
+          .filter((pkg) => pkg.dependencyType === "dev")
+          .map((pkg) => pkg.name),
+      ),
+    ),
+  };
+
+  return (
+    packageName: string,
+    dependencyType: ProjectApiResponse["packages"][number]["dependencyType"],
+    isDirect: boolean,
+  ) => {
+    if (isDirect) return packageName;
+    const candidates =
+      directByType[dependencyType].length > 0
+        ? directByType[dependencyType]
+        : directAll;
+    if (candidates.length === 0) return packageName;
+    const index = hashString(`${packageName}:${dependencyType}`) %
+      candidates.length;
+    return candidates[index];
+  };
+};
+
 export function convertToProjectViewModel(p: ProjectApiResponse): Project {
   // Project -> Package -> Vulnerability の構造をフラットな Vulnerability 配列に変換
+  const pickRootDependency = buildRootDependencyPicker(p.packages);
   const vulnerabilities: Vulnerability[] = p.packages
     .filter((pkg) => pkg.vulnerability)
     .map((pkg) => {
@@ -51,6 +101,11 @@ export function convertToProjectViewModel(p: ProjectApiResponse): Project {
         version: pkg.version,
         severity: mapSeverity(v.severity),
         dependencyType: pkg.dependencyType,
+        rootDependency: pickRootDependency(
+          pkg.name,
+          pkg.dependencyType,
+          pkg.isDirect,
+        ),
         cve: v.cve || "N/A",
         description: v.description,
       };
