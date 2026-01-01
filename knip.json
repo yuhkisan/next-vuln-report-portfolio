@@ -5,7 +5,8 @@
     "app/**/*.{ts,tsx}",
     "lib/**/*.ts",
     "prisma/**/*.ts",
-    "vitest.config.ts"
+    "vitest.config.ts",
+    "playwright.config.ts"
   ],
   "ignore": ["**/*.d.ts", "generated/**"],
   "ignoreDependencies": [
