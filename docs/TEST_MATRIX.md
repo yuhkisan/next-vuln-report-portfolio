@@ -9,7 +9,7 @@ USER_MANUAL / BEHAVIOR_SPEC に対するテスト網羅状況を整理します�
 | 章 | 内容 | カバー状況 | 対応テスト |
 |---|---|---|---|
 | 1 | 基本フロー | ✅ | `tests/e2e/upload-success.spec.ts` |
-| 2 | チーム選択 | ⚠️ | 未カバー（teamIdの切替テストが必要） |
+| 2 | チーム選択 | ✅ | `tests/e2e/team-switch.spec.ts` |
 | 3 | アップロード | ✅ | `tests/e2e/upload-success.spec.ts` / `tests/e2e/upload-errors.spec.ts` |
 | 4 | プロジェクト一覧 | ✅ | `tests/e2e/project-view.spec.ts` |
 | 5 | 脆弱性詳細 | ✅ | `tests/e2e/project-view.spec.ts` |
@@ -28,7 +28,7 @@ USER_MANUAL / BEHAVIOR_SPEC に対するテスト網羅状況を整理します�
 | 4 | 依存抽出ルール | ✅ | `app/api/scans/__tests__/packageParsing.test.ts` |
 | 5 | 脆弱性マッチング | ✅ | `app/lib/fixtures/vulnDb.test.ts` |
 | 6 | Root Dependency | ✅ | `tests/e2e/project-view.spec.ts`（見出し確認） |
-| 7 | 画面挙動 | ✅ | `tests/e2e/upload-success.spec.ts` / `tests/e2e/project-view.spec.ts` |
+| 7 | 画面挙動 | ✅ | `tests/e2e/upload-success.spec.ts` / `tests/e2e/project-view.spec.ts` / `tests/e2e/team-switch.spec.ts` |
 | 8 | 設定画面 | ⚠️ | 未カバー（設定画面E2Eが必要） |
 | 9 | 通知 | ✅ | `tests/e2e/upload-success.spec.ts` / `tests/e2e/upload-errors.spec.ts` |
 
@@ -36,7 +36,5 @@ USER_MANUAL / BEHAVIOR_SPEC に対するテスト網羅状況を整理します�
 
 ## 3. 追加が必要なテスト（ギャップ）
 
-- チーム切替（teamIdパラメータ）のE2E
 - 設定画面（チーム名変更 / 削除 / ガード）のE2E
 - アップロードAPIのエラー応答（teamId欠落など）のAPIテスト
-
