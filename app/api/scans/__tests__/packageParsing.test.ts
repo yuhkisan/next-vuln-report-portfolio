@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { parsePackageContent } from "../packageParsing";
+import { parsePackageContent, parsePackageContentWithErrors } from "../packageParsing";
 
 type ParsedPackage = ReturnType<typeof parsePackageContent>[number];
 
@@ -105,5 +105,22 @@ describe("parsePackageContent", () => {
 
   it("returns empty for invalid JSON", () => {
     expect(parsePackageContent("{invalid")).toEqual([]);
+  });
+
+  it("reports invalid JSON errors", () => {
+    const result = parsePackageContentWithErrors("{invalid");
+    expect(result.error?.code).toBe("invalid_json");
+  });
+
+  it("reports empty file errors", () => {
+    const result = parsePackageContentWithErrors("   ");
+    expect(result.error?.code).toBe("empty");
+  });
+
+  it("reports unsupported lockfile versions", () => {
+    const result = parsePackageContentWithErrors(
+      JSON.stringify({ lockfileVersion: 1 }),
+    );
+    expect(result.error?.code).toBe("unsupported_format");
   });
 });

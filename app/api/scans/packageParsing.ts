@@ -29,6 +29,20 @@ export type ParsedPackage = {
   dependencyType: DependencyType;
 };
 
+export type ParseErrorCode =
+  | "empty"
+  | "invalid_json"
+  | "unsupported_format"
+  | "no_dependencies";
+
+export type ParseResult = {
+  packages: ParsedPackage[];
+  error?: {
+    code: ParseErrorCode;
+    message: string;
+  };
+};
+
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === "object" && value !== null;
 
@@ -156,4 +170,94 @@ export function parsePackageContent(content: string): ParsedPackage[] {
   }
 
   return [];
+}
+
+export function parsePackageContentWithErrors(content: string): ParseResult {
+  if (content.trim().length === 0) {
+    return {
+      packages: [],
+      error: {
+        code: "empty",
+        message:
+          "空のファイルです。依存情報を含む JSON をアップロードしてください。",
+      },
+    };
+  }
+
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    return {
+      packages: [],
+      error: {
+        code: "invalid_json",
+        message: "JSONとして解析できません。形式を確認してください。",
+      },
+    };
+  }
+
+  if (isPackageLockContent(parsed)) {
+    const lockfileVersion =
+      typeof parsed.lockfileVersion === "number" ? parsed.lockfileVersion : 0;
+    if (lockfileVersion !== 2 && lockfileVersion !== 3) {
+      return {
+        packages: [],
+        error: {
+          code: "unsupported_format",
+          message:
+            "対応していない lockfile バージョンです。v2/v3 の package-lock.json をアップロードしてください。",
+        },
+      };
+    }
+
+    if (!parsed.packages) {
+      return {
+        packages: [],
+        error: {
+          code: "unsupported_format",
+          message:
+            "package-lock.json の形式が不正です。内容を確認してください。",
+        },
+      };
+    }
+
+    const packages = parsePackageLockContent(parsed);
+    if (packages.length === 0) {
+      return {
+        packages,
+        error: {
+          code: "no_dependencies",
+          message:
+            "依存関係が見つかりませんでした。内容を確認してください。",
+        },
+      };
+    }
+
+    return { packages };
+  }
+
+  if (isPackageJsonContent(parsed)) {
+    const packages = parsePackageJsonContent(parsed);
+    if (packages.length === 0) {
+      return {
+        packages,
+        error: {
+          code: "no_dependencies",
+          message:
+            "依存関係が見つかりませんでした。dependencies/devDependencies を確認してください。",
+        },
+      };
+    }
+    return { packages };
+  }
+
+  return {
+    packages: [],
+    error: {
+      code: "unsupported_format",
+      message:
+        "対応していない JSON 形式です。package-lock.json または package.json をアップロードしてください。",
+    },
+  };
 }

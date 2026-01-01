@@ -84,13 +84,9 @@ export const UploadArea = ({ onUpload }: UploadAreaProps) => {
           : "SBOMファイルをアップロード"}
       </Typography>
       <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-        SPDX, CycloneDX 形式のJSONまたはXMLファイルをドラッグ＆ドロップ
+        package-lock.json / package.json（JSON・5MB以下）をドラッグ＆ドロップ
         <br />
         またはクリックして選択してください
-        <br />
-        <Typography variant="caption" color="error">
-          ( &quot;error&quot; を含むファイル名で失敗をテストできます )
-        </Typography>
       </Typography>
       <Button
         variant="contained"

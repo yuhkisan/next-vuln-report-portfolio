@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import type { AlertColor } from "@mui/material";
 import type { Team } from "../types/viewModel";
 
 type AppContextType = {
@@ -10,9 +11,10 @@ type AppContextType = {
   setCurrentTeamId: React.Dispatch<React.SetStateAction<string>>;
   currentTeam: Team;
 
-  showNotification: (message: string) => void;
+  showNotification: (message: string, severity?: AlertColor) => void;
   snackbarOpen: boolean;
   snackbarMessage: string;
+  snackbarSeverity: AlertColor;
   handleCloseNotification: (
     event?: React.SyntheticEvent | Event,
     reason?: string,
@@ -37,11 +39,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] =
+    useState<AlertColor>("info");
 
   const currentTeam = teams.find((t) => t.id === currentTeamId) || teams[0];
 
-  const showNotification = (message: string) => {
+  const showNotification = (message: string, severity: AlertColor = "info") => {
     setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
     setSnackbarOpen(true);
   };
 
@@ -63,6 +68,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         showNotification,
         snackbarOpen,
         snackbarMessage,
+        snackbarSeverity,
         handleCloseNotification,
       }}
     >

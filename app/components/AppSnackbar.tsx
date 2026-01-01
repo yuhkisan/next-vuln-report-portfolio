@@ -4,7 +4,12 @@ import { Snackbar, Alert } from "@mui/material";
 import { useApp } from "../contexts/AppContext";
 
 export const AppSnackbar = () => {
-  const { snackbarOpen, snackbarMessage, handleCloseNotification } = useApp();
+  const {
+    snackbarOpen,
+    snackbarMessage,
+    snackbarSeverity,
+    handleCloseNotification,
+  } = useApp();
 
   return (
     <Snackbar
@@ -15,7 +20,7 @@ export const AppSnackbar = () => {
     >
       <Alert
         onClose={handleCloseNotification}
-        severity="info"
+        severity={snackbarSeverity}
         variant="filled"
         sx={{ width: "100%", boxShadow: 3 }}
       >
