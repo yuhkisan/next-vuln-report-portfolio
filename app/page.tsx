@@ -34,7 +34,7 @@ export default function UploadPage() {
 
       const result = (await response.json()) as ScanResponse | ApiErrorResponse;
 
-      if (!response.ok) {
+      if (!response.ok || "error" in result) {
         showNotification(
           "error" in result ? result.error : "アップロードに失敗しました",
         );
