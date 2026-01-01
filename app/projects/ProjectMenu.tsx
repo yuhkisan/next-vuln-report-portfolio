@@ -15,7 +15,7 @@ import {
   IconButton,
 } from "@mui/material";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
-import { useApp } from "../contexts/AppContext";
+import { toast } from "sonner";
 import type { Project } from "../types/viewModel";
 
 type Props = {
@@ -23,7 +23,6 @@ type Props = {
 };
 
 export const ProjectMenu = ({ project }: Props) => {
-  const { showNotification } = useApp();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -48,14 +47,14 @@ export const ProjectMenu = ({ project }: Props) => {
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     // TODO: Server Action
-    showNotification(`「${project.name}」を削除しました（モック）`);
+    toast.success(`「${project.name}」を削除しました（モック）`);
     handleClose();
   };
 
   const handleRenameSubmit = () => {
     if (newName.trim()) {
       // TODO: Server Action (optimistic update or revalidate)
-      showNotification(`名前を「${newName}」に変更しました（モック）`);
+      toast.success(`名前を「${newName}」に変更しました（モック）`);
       setIsRenameDialogOpen(false);
     }
   };

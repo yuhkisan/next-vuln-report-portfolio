@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppProvider } from "./contexts/AppContext";
 import { AppHeader } from "./components/AppHeader";
-import { AppSnackbar } from "./components/AppSnackbar";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "SBOM Vulnerability Scanner",
@@ -17,11 +16,9 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body style={{ margin: 0, padding: 0 }}>
-        <AppProvider>
-          <AppHeader />
-          <main>{children}</main>
-          <AppSnackbar />
-        </AppProvider>
+        <AppHeader />
+        <main>{children}</main>
+        <Toaster richColors position="bottom-center" />
       </body>
     </html>
   );

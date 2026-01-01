@@ -1,11 +1,13 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Box, Button } from "@mui/material";
 import { Search, Settings } from "lucide-react";
 
 export const HeaderActions = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const teamId = searchParams.get("teamId");
 
   return (
     <Box sx={{ display: "flex", gap: 1 }}>
@@ -15,7 +17,9 @@ export const HeaderActions = () => {
       <Button
         startIcon={<Settings size={18} />}
         color="inherit"
-        onClick={() => router.push("/settings")}
+        onClick={() =>
+          router.push(teamId ? `/settings?teamId=${teamId}` : "/settings")
+        }
       >
         設定
       </Button>
