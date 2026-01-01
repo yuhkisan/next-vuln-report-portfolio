@@ -1,50 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { minVersion } from "semver";
 import { prisma } from "@/lib/prisma";
 import { findVulnerabilities } from "@/app/lib/fixtures/vulnDb";
-
-type PackageJsonDeps = Record<string, string>;
-
-type PackageJsonContent = {
-  name?: string;
-  dependencies?: PackageJsonDeps;
-  devDependencies?: PackageJsonDeps;
-};
-
-function parsePackageJson(content: string): Array<{
-  name: string;
-  version: string;
-  isDirect: boolean;
-}> {
-  let parsed: PackageJsonContent;
-  try {
-    parsed = JSON.parse(content);
-  } catch {
-    return [];
-  }
-
-  const result: Array<{ name: string; version: string; isDirect: boolean }> =
-    [];
-
-  const processDeps = (deps: PackageJsonDeps | undefined) => {
-    if (!deps) return;
-    for (const [name, range] of Object.entries(deps)) {
-      try {
-        const resolved = minVersion(range);
-        if (resolved) {
-          result.push({ name, version: resolved.version, isDirect: true });
-        }
-      } catch {
-        // skip invalid version ranges
-      }
-    }
-  };
-
-  processDeps(parsed.dependencies);
-  processDeps(parsed.devDependencies);
-
-  return result;
-}
+import { parsePackageContent } from "./packageParsing";
 
 export async function POST(request: NextRequest) {
   try {
@@ -60,11 +17,11 @@ export async function POST(request: NextRequest) {
     }
 
     const content = await file.text();
-    const packages = parsePackageJson(content);
+    const packages = parsePackageContent(content);
 
     if (packages.length === 0) {
       return NextResponse.json(
-        { error: "Invalid package.json or no dependencies found" },
+        { error: "Invalid package file or no dependencies found" },
         { status: 400 },
       );
     }
