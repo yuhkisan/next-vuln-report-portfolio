@@ -14,6 +14,7 @@
     "@eslint/js",
     "@typescript-eslint/parser",
     "eslint-plugin-react-hooks",
-    "globals"
+    "globals",
+    "yaml"
   ]
 }
