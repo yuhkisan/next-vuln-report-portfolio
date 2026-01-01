@@ -15,6 +15,7 @@ import { FileCode, ChevronRight, Home } from "lucide-react";
 import { getProjectById, getTeams } from "@/app/lib/data";
 import { VulnerabilitySection } from "./VulnerabilitySection";
 import { AiReportButton } from "./AiReportButton";
+import { VulnerabilitySummaryCard } from "./VulnerabilitySummaryCard";
 
 export const ProjectDetailView = async ({
   projectId,
@@ -110,6 +111,8 @@ export const ProjectDetailView = async ({
             </Grid>
           </Grid>
         </Paper>
+
+        <VulnerabilitySummaryCard summary={project.summary} />
 
         {/* 脆弱性セクション (Client Component) */}
         <VulnerabilitySection vulnerabilities={project.vulnerabilities} />
