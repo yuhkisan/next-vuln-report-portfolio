@@ -13,6 +13,7 @@ import {
 import { Building } from "lucide-react";
 import { toast } from "sonner";
 import { UploadArea } from "./UploadArea";
+import { TeamIdGuard } from "./components/TeamIdGuard";
 import type { Team } from "./types/viewModel";
 import type { ApiErrorResponse, ScanResponse } from "./types/api";
 
@@ -99,7 +100,10 @@ export const UploadPageClient = ({
       toast.success(
         `解析完了: ${result.vulnerabilityCount}件の脆弱性が見つかりました`,
       );
-      router.push(`/projects/${result.projectId}`);
+      const targetUrl = currentTeamId
+        ? `/projects/${result.projectId}?teamId=${currentTeamId}`
+        : `/projects/${result.projectId}`;
+      router.push(targetUrl);
     } catch {
       const message = "ネットワークエラーが発生しました";
       setUploadError(message);
@@ -110,6 +114,7 @@ export const UploadPageClient = ({
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
+      <TeamIdGuard defaultTeamId={defaultTeamId} />
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Box sx={{ maxWidth: 600, mx: "auto", mt: 8 }}>
           {uploadError && (

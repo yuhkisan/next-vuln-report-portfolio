@@ -16,7 +16,7 @@ Dependency Vulnerability Scanner の基本的な操作方法をまとめたマ�
 
 - 画面上部のチームセレクタから選択できます。
 - チームは URL の `?teamId=xxx` で管理されます。
-- `teamId` がない場合は先頭のチームが選択されます。
+- `teamId` がない場合は先頭のチームが選択され、URL に反映されます。
 
 ### ヒント
 - プロジェクト一覧では `/?teamId=...` ではなく `/projects?teamId=...` で切り替わります。

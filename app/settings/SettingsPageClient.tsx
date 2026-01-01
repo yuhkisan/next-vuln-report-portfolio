@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import type { Team } from "../types/viewModel";
 import { TeamSettings } from "./TeamSettings";
 import { getDeleteTeamResult } from "./teamDelete";
+import { TeamIdGuard } from "../components/TeamIdGuard";
 
 type SettingsPageClientProps = {
   teams: Team[];
@@ -47,6 +48,7 @@ export const SettingsPageClient = ({
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
+      <TeamIdGuard defaultTeamId={defaultTeamId} />
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         <Link
           href={`/projects?teamId=${currentTeam.id}`}
