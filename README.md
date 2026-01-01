@@ -1,176 +1,108 @@
-# SBOM Vulnerability Scanner
+# Dependency Vulnerability Scanner
 
-Next.js で構築された SBOM（Software Bill of Materials）脆弱性スキャナー。アップロードされた SBOM ファイルを解析し、セキュリティ脆弱性を検出・管理する Web アプリケーションです。
+`package-lock.json` / `package.json` を解析して脆弱性レポートを表示するデモアプリです。
+脆弱性情報は **モックDB + 決定論的な生成ロジック** を使います。
 
-> 📋 **[ポートフォリオ A 方針ドキュメント](./PORTFOLIO_A_PLAN.md)** - package-lock.json 解析機能の設計方針
+> 📋 **[ポートフォリオ A 方針ドキュメント](./PORTFOLIO_A_PLAN.md)** - 方針/スコープ/非スコープ
 
 ## 🌟 主な機能
 
-- **チーム管理**: 複数のチームを作成・管理し、プロジェクトを組織化
-- **SBOM アップロード**: SPDX、CycloneDX 形式の JSON または XML ファイルに対応
-- **脆弱性スキャン**: アップロードされた SBOM から脆弱性を自動検出
-- **リアルタイム解析**: ファイルアップロード後、リアルタイムで解析状態を表示
-- **AI 分析**: Gemini AI を使用した脆弱性の詳細解説とリスク分析
-- **フィルタリング**: 深刻度別、パッケージ名別の検索・フィルタリング機能
-- **メンバー管理**: チームメンバーの招待と権限管理
+- **チーム選択 & プロジェクト管理**: チームごとのアップロードと結果の一覧/詳細
+- **プロジェクト操作**: 名前変更 / 削除（永続化）
+- **アップロード解析**: `package-lock.json` (v2/v3) / `package.json`
+- **結果の可視化**: サマリー、フィルタ、Root Dependency グルーピング
+- **AI 解説**: Gemini API（未設定時はモック）
+- **設定画面**: チーム名変更/削除（モック挙動）
+
+## ✅ 制約
+
+- JSON 形式のみ
+- `.json` 拡張子のみ
+- 5MB 以下
 
 ## 🛠️ 技術スタック
 
-- **フレームワーク**: [Next.js 16](https://nextjs.org/) (App Router)
-- **言語**: TypeScript
-- **UI ライブラリ**: [Material-UI (MUI) v7](https://mui.com/)
-- **ORM**: [Prisma v7](https://www.prisma.io/) (SQLite)
-- **アイコン**: [Lucide React](https://lucide.dev/)
-- **AI**: Google Gemini API (オプション)
+- **フレームワーク**: Next.js 16 (App Router)
+- **言語**: TypeScript / React 19
+- **UI**: MUI v7
+- **ORM**: Prisma (SQLite)
+- **テスト**: Vitest / Playwright
+- **AI**: Gemini API (オプション)
 
-## 📦 プロジェクト構造
+## 📦 ディレクトリ構成（抜粋）
 
 ```
-vuln-app/
-├── app/
-│   ├── components/          # 再利用可能なコンポーネント
-│   │   ├── SeverityChip.tsx
-│   │   ├── ProjectCard.tsx
-│   │   ├── UploadArea.tsx
-│   │   └── TeamSettings.tsx
-│   ├── lib/                 # ユーティリティ関数
-│   │   ├── gemini.ts       # Gemini API統合
-│   │   └── mockData.ts     # モックデータ生成
-│   ├── types/              # TypeScript型定義
-│   │   └── index.ts
-│   ├── page.tsx            # メインページ
-│   ├── layout.tsx          # ルートレイアウト
-│   └── globals.css         # グローバルスタイル
-├── public/                 # 静的ファイル
-├── next.config.js          # Next.js設定
-├── tsconfig.json           # TypeScript設定
-└── package.json            # 依存関係
+app/
+  api/scans/           # POST /api/scans (解析)
+  projects/            # プロジェクト一覧/詳細
+  settings/            # 設定（モック）
+  lib/fixtures/        # モック脆弱性DB
+prisma/                # Prisma schema/seed
+tests/e2e/             # Playwright E2E
 ```
 
 ## 🚀 セットアップ
 
 ### 前提条件
 
-- Node.js 18.0 以上
-- npm または yarn
+- Node.js 18 以上
+- npm
 
 ### インストール
-
-1. リポジトリをクローン
-
-```bash
-git clone https://github.com/yuhkisan/vuln-app.git
-cd vuln-app
-```
-
-2. 依存関係をインストール
 
 ```bash
 npm install
 ```
 
-3. 環境変数の設定
+### 環境変数
 
-プロジェクトルートに `.env` ファイルを作成し、以下を設定します。
+プロジェクトルートに `.env` を作成し、以下を設定します。
 
 ```env
 DATABASE_URL="file:./dev.db"
 ```
 
-4. データベースのセットアップ
-
-Prisma を使用して SQLite データベースを作成し、初期データを投入します。
+### DB 準備
 
 ```bash
-# データベースの作成（マイグレーション適用 & クライアント生成）
-npx prisma migrate dev --name init
-
-# シードデータの投入
+npm run db:push
 npm run db:seed
 ```
 
-5. 開発サーバーを起動
+### 開発サーバー
 
 ```bash
 npm run dev
 ```
 
-6. ブラウザで http://localhost:3000 を開く
-
-> **Note**: データベースの中身を確認したい場合は `npm run db:studio` を実行してください。
-
-## 🔧 ビルドとデプロイ
-
-### プロダクションビルド
-
-```bash
-npm run build
-```
-
-### プロダクションサーバー起動
-
-```bash
-npm start
-```
-
 ## 🎯 使い方（概要）
 
-1. `/` から `package-lock.json` / `package.json` をアップロード  
-2. 解析完了後に結果画面へ遷移  
-3. 行クリックで詳細ドロワーを確認（Dependency Path / 参照リンク / 推奨アクション）
-
-制約: JSONのみ / 5MB以下 / teamId は URL パラメータで管理
+1. `/` で `package-lock.json` / `package.json` をアップロード
+2. 解析完了後、結果画面へ遷移
+3. 行クリックで詳細ドロワーを確認
 
 詳細は `docs/USER_MANUAL.md` を参照してください。
 
 関連ドキュメント:
 - `docs/USER_MANUAL.md`（操作マニュアル）
 - `docs/BEHAVIOR_SPEC.md`（挙動仕様）
+- `docs/TEST_MATRIX.md`（テスト網羅表）
+- `docs/ISSUE_BACKLOG.md`（未実装/未検証の一覧）
 
-## 🔑 環境変数
+## 🧪 テスト
 
-### 必須
-
-`.env` ファイルに以下を設定してください。
-
-```env
-DATABASE_URL="file:./dev.db"
+```bash
+npm test          # Vitest
+npm run test:e2e  # Playwright
+npm run lint
+npm run build
 ```
-
-### オプション (Gemini API)
-
-Gemini API を使用する場合は、`app/lib/gemini.ts`内の`apiKey`を設定してください。
-
-```typescript
-const apiKey = "YOUR_GEMINI_API_KEY";
-```
-
-> **注**: API キーが設定されていない場合、モックレスポンスが使用されます。
 
 ## 📝 開発メモ
 
-### モックデータ
-
-- デモ用にチームとサンプルプロジェクトが初期データとして含まれています
-- 脆弱性データは **入力に依存した擬似ロジック** を使用しています
-
-## 🤝 コントリビューション
-
-プルリクエストを歓迎します。大きな変更の場合は、まず issue を開いて変更内容を議論してください。
+- 脆弱性データは **固定ルール + 決定論的生成** で作成します。
+- 設定画面/プロジェクト名変更/削除などは **モック挙動** です。
 
 ## 📄 ライセンス
 
 [MIT](LICENSE)
-
-## 🙏 謝辞
-
-このプロジェクトは以下のオープンソースプロジェクトを使用しています：
-
-- Next.js
-- Material-UI
-- Lucide Icons
-- Google Gemini API
-
----
-
-**Built with ❤️ using Claude Code**

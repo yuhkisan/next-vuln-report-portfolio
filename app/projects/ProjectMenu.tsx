@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Menu,
   MenuItem,
@@ -23,6 +24,7 @@ type Props = {
 };
 
 export const ProjectMenu = ({ project }: Props) => {
+  const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [newName, setNewName] = useState("");
@@ -46,23 +48,74 @@ export const ProjectMenu = ({ project }: Props) => {
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    // TODO: Server Action
-    toast.success(`「${project.name}」を削除しました（モック）`);
     handleClose();
+    handleDeleteProject();
   };
 
   const handleRenameSubmit = () => {
-    if (newName.trim()) {
-      // TODO: Server Action (optimistic update or revalidate)
-      toast.success(`名前を「${newName}」に変更しました（モック）`);
-      setIsRenameDialogOpen(false);
-    }
+    handleRenameProject();
   };
 
   // ダイアログクリック時の伝播防止
   const handleDialogClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+  };
+
+  const handleRenameProject = async () => {
+    const nextName = newName.trim();
+    if (!nextName) {
+      toast.error("プロジェクト名を入力してください。");
+      return;
+    }
+    if (nextName === project.name) {
+      setIsRenameDialogOpen(false);
+      return;
+    }
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: nextName }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        const message =
+          typeof result?.error === "string"
+            ? result.error
+            : "名前の変更に失敗しました";
+        toast.error(message);
+        return;
+      }
+      toast.success(`名前を「${nextName}」に変更しました`);
+      setIsRenameDialogOpen(false);
+      router.refresh();
+    } catch {
+      toast.error("ネットワークエラーが発生しました");
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    try {
+      const response = await fetch(`/api/projects/${project.id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        const message =
+          typeof result?.error === "string"
+            ? result.error
+            : "削除に失敗しました";
+        toast.error(message);
+        return;
+      }
+      toast.success(`「${project.name}」を削除しました`);
+      router.refresh();
+    } catch {
+      toast.error("ネットワークエラーが発生しました");
+    }
   };
 
   return (
