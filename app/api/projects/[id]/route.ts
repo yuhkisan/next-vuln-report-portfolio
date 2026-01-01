@@ -3,10 +3,13 @@ import { prisma } from "@/lib/prisma";
 import type { ApiErrorResponse } from "@/app/types/api";
 
 type RouteContext = {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 };
 
-const getProjectId = (context: RouteContext) => context.params?.id ?? "";
+const getProjectId = async (context: RouteContext) => {
+  const params = await context.params;
+  return params?.id ?? "";
+};
 
 const getProjectOr404 = async (id: string) => {
   if (!id) return null;
@@ -14,7 +17,7 @@ const getProjectOr404 = async (id: string) => {
 };
 
 export async function PATCH(request: NextRequest, context: RouteContext) {
-  const id = getProjectId(context);
+  const id = await getProjectId(context);
   const project = await getProjectOr404(id);
   if (!project) {
     return NextResponse.json<ApiErrorResponse>(
@@ -55,7 +58,7 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 }
 
 export async function DELETE(_request: NextRequest, context: RouteContext) {
-  const id = getProjectId(context);
+  const id = await getProjectId(context);
   const project = await getProjectOr404(id);
   if (!project) {
     return NextResponse.json<ApiErrorResponse>(

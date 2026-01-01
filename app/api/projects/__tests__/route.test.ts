@@ -36,7 +36,7 @@ describe("PATCH /api/projects/:id", () => {
     vi.mocked(prisma.project.findUnique).mockResolvedValueOnce(null);
 
     const response = await PATCH(buildRequest("PATCH", JSON.stringify({ name: "New" })), {
-      params: { id: "project-1" },
+      params: Promise.resolve({ id: "project-1" }),
     });
     const body = await toJson<ErrorResponse>(response);
 
@@ -51,7 +51,7 @@ describe("PATCH /api/projects/:id", () => {
     } as never);
 
     const response = await PATCH(buildRequest("PATCH", JSON.stringify({ name: "   " })), {
-      params: { id: "project-1" },
+      params: Promise.resolve({ id: "project-1" }),
     });
     const body = await toJson<ErrorResponse>(response);
 
@@ -70,7 +70,7 @@ describe("PATCH /api/projects/:id", () => {
     } as never);
 
     const response = await PATCH(buildRequest("PATCH", JSON.stringify({ name: "Renamed" })), {
-      params: { id: "project-1" },
+      params: Promise.resolve({ id: "project-1" }),
     });
     const body = await toJson<{ id: string; name: string }>(response);
 
@@ -85,7 +85,7 @@ describe("DELETE /api/projects/:id", () => {
     vi.mocked(prisma.project.findUnique).mockResolvedValueOnce(null);
 
     const response = await DELETE(buildRequest("DELETE"), {
-      params: { id: "project-1" },
+      params: Promise.resolve({ id: "project-1" }),
     });
     const body = await toJson<ErrorResponse>(response);
 
@@ -103,7 +103,7 @@ describe("DELETE /api/projects/:id", () => {
     } as never);
 
     const response = await DELETE(buildRequest("DELETE"), {
-      params: { id: "project-1" },
+      params: Promise.resolve({ id: "project-1" }),
     });
     const body = await toJson<{ id: string }>(response);
 
