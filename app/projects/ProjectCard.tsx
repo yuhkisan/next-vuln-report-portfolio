@@ -17,7 +17,7 @@ import {
   ShieldAlert,
   AlertCircle,
 } from "lucide-react";
-import type { Project } from "../types";
+import type { Project } from "../types/viewModel";
 import { ProjectMenu } from "./ProjectMenu";
 
 type Props = {

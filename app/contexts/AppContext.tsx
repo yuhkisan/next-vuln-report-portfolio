@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import type { Team } from "../types";
+import type { Team } from "../types/viewModel";
 
 type AppContextType = {
   teams: Team[];

@@ -12,6 +12,7 @@ import {
 import { Building } from "lucide-react";
 import { useApp } from "./contexts/AppContext";
 import { UploadArea } from "./UploadArea";
+import type { ApiErrorResponse, ScanResponse } from "./types/api";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -31,10 +32,12 @@ export default function UploadPage() {
         body: formData,
       });
 
-      const result = await response.json();
+      const result = (await response.json()) as ScanResponse | ApiErrorResponse;
 
       if (!response.ok) {
-        showNotification(result.error || "アップロードに失敗しました");
+        showNotification(
+          "error" in result ? result.error : "アップロードに失敗しました",
+        );
         setIsUploading(false);
         return;
       }

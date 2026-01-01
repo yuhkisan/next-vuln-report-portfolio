@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { useApp } from "../contexts/AppContext";
-import type { Project } from "../types";
+import type { Project } from "../types/viewModel";
 
 type Props = {
   project: Project;
