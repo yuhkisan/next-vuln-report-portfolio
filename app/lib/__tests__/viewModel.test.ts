@@ -1,15 +1,16 @@
 import { describe, expect, it } from "vitest";
 
-import { convertToUIProject, type ProjectViewModelSource } from "../viewModel";
+import { convertToProjectViewModel } from "../viewModel";
+import type { ProjectApiResponse } from "@/app/types/api";
 
-describe("convertToUIProject", () => {
+describe("convertToProjectViewModel", () => {
   it("flattens vulnerabilities and maps severity", () => {
-    const input: ProjectViewModelSource = {
+    const input: ProjectApiResponse = {
       id: "project-1",
       teamId: "team-1",
       name: "Sample",
       fileName: "package.json",
-      uploadDate: new Date("2025-01-01T00:00:00Z"),
+      uploadDate: "2025-01-01T00:00:00Z",
       status: "completed",
       pkgCount: 3,
       errorMessage: null,
@@ -42,7 +43,7 @@ describe("convertToUIProject", () => {
       ],
     };
 
-    const result = convertToUIProject(input);
+    const result = convertToProjectViewModel(input);
 
     expect(result.vulnerabilities).toEqual([
       {
@@ -62,22 +63,31 @@ describe("convertToUIProject", () => {
         description: "desc2",
       },
     ]);
+    expect(result.summary).toEqual({
+      total: 2,
+      bySeverity: {
+        Critical: 0,
+        High: 1,
+        Medium: 0,
+        Low: 1,
+      },
+    });
   });
 
   it("maps null errorMessage to undefined", () => {
-    const input: ProjectViewModelSource = {
+    const input: ProjectApiResponse = {
       id: "project-2",
       teamId: "team-2",
       name: "Sample 2",
       fileName: "package-lock.json",
-      uploadDate: new Date("2025-01-02T00:00:00Z"),
+      uploadDate: "2025-01-02T00:00:00Z",
       status: "failed",
       pkgCount: 0,
       errorMessage: null,
       packages: [],
     };
 
-    const result = convertToUIProject(input);
+    const result = convertToProjectViewModel(input);
 
     expect(result.errorMessage).toBeUndefined();
   });

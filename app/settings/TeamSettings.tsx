@@ -19,7 +19,7 @@ import {
   InputAdornment,
 } from "@mui/material";
 import { Settings, Users, Key, Trash2, Mail, XCircle } from "lucide-react";
-import type { Team, Member } from "../types";
+import type { Team, Member } from "../types/viewModel";
 import { generateMockMembers } from "../lib/mockData";
 
 type TeamSettingsProps = {

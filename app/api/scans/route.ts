@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findVulnerabilities } from "@/app/lib/fixtures/vulnDb";
 import { parsePackageContent } from "./packageParsing";
+import type { ApiErrorResponse, ScanResponse } from "@/app/types/api";
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +11,7 @@ export async function POST(request: NextRequest) {
     const teamId = formData.get("teamId") as string | null;
 
     if (!file || !teamId) {
-      return NextResponse.json(
+      return NextResponse.json<ApiErrorResponse>(
         { error: "file and teamId are required" },
         { status: 400 },
       );
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     const packages = parsePackageContent(content);
 
     if (packages.length === 0) {
-      return NextResponse.json(
+      return NextResponse.json<ApiErrorResponse>(
         { error: "Invalid package file or no dependencies found" },
         { status: 400 },
       );
@@ -73,14 +74,14 @@ export async function POST(request: NextRequest) {
       (p) => p.vulnerability,
     ).length;
 
-    return NextResponse.json({
+    return NextResponse.json<ScanResponse>({
       projectId: project.id,
       status: project.status,
       vulnerabilityCount,
     });
   } catch (error) {
     console.error("Scan API error:", error);
-    return NextResponse.json(
+    return NextResponse.json<ApiErrorResponse>(
       { error: "Internal server error" },
       { status: 500 },
     );

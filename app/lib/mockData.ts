@@ -1,4 +1,4 @@
-import type { Vulnerability, Member, Severity } from "../types";
+import type { Vulnerability, Member, Severity } from "../types/viewModel";
 
 export const generateMockVulnerabilities = (count: number): Vulnerability[] => {
   const severities: Severity[] = ["Critical", "High", "Medium", "Low"];

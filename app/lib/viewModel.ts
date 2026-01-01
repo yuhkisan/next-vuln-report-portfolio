@@ -1,27 +1,5 @@
-import type { Project, Severity, Vulnerability } from "@/app/types";
-
-type PackageWithVulnerability = {
-  name: string;
-  version: string;
-  vulnerability: {
-    id: string;
-    severity: string;
-    cve: string | null;
-    description: string;
-  } | null;
-};
-
-export type ProjectViewModelSource = {
-  id: string;
-  teamId: string;
-  name: string;
-  fileName: string;
-  uploadDate: Date;
-  status: string;
-  pkgCount: number;
-  errorMessage?: string | null;
-  packages: PackageWithVulnerability[];
-};
+import type { Project, Severity, Vulnerability, VulnerabilitySummary } from "@/app/types/viewModel";
+import type { ProjectApiResponse } from "@/app/types/api";
 
 // 重要度文字列をUIの型に変換
 const mapSeverity = (severity: string): Severity => {
@@ -38,7 +16,25 @@ const mapSeverity = (severity: string): Severity => {
   }
 };
 
-export function convertToUIProject(p: ProjectViewModelSource): Project {
+const buildSummary = (vulnerabilities: Vulnerability[]): VulnerabilitySummary => {
+  const bySeverity: VulnerabilitySummary["bySeverity"] = {
+    Critical: 0,
+    High: 0,
+    Medium: 0,
+    Low: 0,
+  };
+
+  for (const vuln of vulnerabilities) {
+    bySeverity[vuln.severity] += 1;
+  }
+
+  return {
+    total: vulnerabilities.length,
+    bySeverity,
+  };
+};
+
+export function convertToProjectViewModel(p: ProjectApiResponse): Project {
   // Project -> Package -> Vulnerability の構造をフラットな Vulnerability 配列に変換
   const vulnerabilities: Vulnerability[] = p.packages
     .filter((pkg) => pkg.vulnerability)
@@ -54,14 +50,17 @@ export function convertToUIProject(p: ProjectViewModelSource): Project {
       };
     });
 
+  const summary = buildSummary(vulnerabilities);
+
   return {
     id: p.id,
     teamId: p.teamId,
     name: p.name,
     fileName: p.fileName,
-    uploadDate: p.uploadDate,
-    status: p.status as "analyzing" | "completed" | "failed",
+    uploadDate: new Date(p.uploadDate),
+    status: p.status,
     vulnerabilities: vulnerabilities,
+    summary,
     pkgCount: p.pkgCount,
     errorMessage: p.errorMessage || undefined,
   };

@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
-import type { Project } from "@/app/types";
+import type { Project } from "@/app/types/viewModel";
+import type { ProjectApiResponse } from "@/app/types/api";
 import { Prisma } from "../../generated/prisma/client";
-import { convertToUIProject } from "./viewModel";
+import { convertToProjectViewModel } from "./viewModel";
 
 type ProjectWithPackages = Prisma.ProjectGetPayload<{
   include: {
@@ -12,6 +13,29 @@ type ProjectWithPackages = Prisma.ProjectGetPayload<{
     };
   };
 }>;
+
+const toProjectApiResponse = (project: ProjectWithPackages): ProjectApiResponse => ({
+  id: project.id,
+  teamId: project.teamId,
+  name: project.name,
+  fileName: project.fileName,
+  uploadDate: project.uploadDate.toISOString(),
+  status: project.status as ProjectApiResponse["status"],
+  pkgCount: project.pkgCount,
+  errorMessage: project.errorMessage,
+  packages: project.packages.map((pkg) => ({
+    name: pkg.name,
+    version: pkg.version,
+    vulnerability: pkg.vulnerability
+      ? {
+          id: pkg.vulnerability.id,
+          severity: pkg.vulnerability.severity,
+          cve: pkg.vulnerability.cve,
+          description: pkg.vulnerability.description,
+        }
+      : null,
+  })),
+});
 
 export async function getProjects(teamId?: string): Promise<Project[]> {
   const where = teamId ? { teamId } : {};
@@ -29,7 +53,7 @@ export async function getProjects(teamId?: string): Promise<Project[]> {
     },
   });
 
-  return projects.map((p: ProjectWithPackages) => convertToUIProject(p));
+  return projects.map((p) => convertToProjectViewModel(toProjectApiResponse(p)));
 }
 
 // 単一プロジェクトを ID で取得
@@ -46,7 +70,7 @@ export async function getProjectById(id: string): Promise<Project | null> {
   });
 
   if (!project) return null;
-  return convertToUIProject(project);
+  return convertToProjectViewModel(toProjectApiResponse(project));
 }
 
 export async function getTeams() {

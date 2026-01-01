@@ -1,5 +1,5 @@
 import { satisfies } from "semver";
-import type { Severity } from "../../types";
+import type { Severity } from "../../types/viewModel";
 
 export type VulnerabilityRule = {
   packageName: string;

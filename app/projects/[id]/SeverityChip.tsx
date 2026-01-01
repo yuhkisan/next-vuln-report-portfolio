@@ -1,5 +1,5 @@
 import { Chip } from "@mui/material";
-import type { Severity } from "../../types";
+import type { Severity } from "../../types/viewModel";
 
 export const SeverityChip = ({ severity }: { severity: Severity }) => {
   let color: "error" | "warning" | "info" | "success" = "info";
