@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { findVulnerabilities } from "@/app/lib/fixtures/vulnDb";
-import { parsePackageContent } from "./packageParsing";
+import { parsePackageContentWithErrors } from "./packageParsing";
 import type { ApiErrorResponse, ScanResponse } from "@/app/types/api";
 
 export async function POST(request: NextRequest) {
@@ -9,6 +9,7 @@ export async function POST(request: NextRequest) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
     const teamId = formData.get("teamId") as string | null;
+    const maxFileSize = 5 * 1024 * 1024;
 
     if (!file || !teamId) {
       return NextResponse.json<ApiErrorResponse>(
@@ -17,12 +18,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const content = await file.text();
-    const packages = parsePackageContent(content);
-
-    if (packages.length === 0) {
+    if (file.size === 0) {
       return NextResponse.json<ApiErrorResponse>(
-        { error: "Invalid package file or no dependencies found" },
+        { error: "空のファイルです。依存情報を含む JSON をアップロードしてください。" },
+        { status: 400 },
+      );
+    }
+
+    if (file.size > maxFileSize) {
+      return NextResponse.json<ApiErrorResponse>(
+        { error: "ファイルサイズが5MBを超えています。5MB以下にしてください。" },
+        { status: 413 },
+      );
+    }
+
+    const content = await file.text();
+    const parseResult = parsePackageContentWithErrors(content);
+    const packages = parseResult.packages;
+
+    if (parseResult.error) {
+      return NextResponse.json<ApiErrorResponse>(
+        { error: parseResult.error.message },
         { status: 400 },
       );
     }
