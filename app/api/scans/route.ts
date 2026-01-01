@@ -76,7 +76,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json<ScanResponse>({
       projectId: project.id,
-      status: project.status,
+      status: project.status as ScanResponse["status"],
       vulnerabilityCount,
     });
   } catch (error) {
