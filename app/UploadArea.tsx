@@ -58,7 +58,7 @@ export const UploadArea = ({ onUpload }: UploadAreaProps) => {
         type="file"
         hidden
         ref={fileInputRef}
-        accept=".json,.xml,.spdx"
+        accept=".json"
         onChange={handleFileChange}
       />
       <Box
