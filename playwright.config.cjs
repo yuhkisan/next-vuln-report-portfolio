@@ -1,10 +1,12 @@
-import { defineConfig } from "@playwright/test";
+const { defineConfig } = require("@playwright/test");
 
 const port = process.env.PLAYWRIGHT_PORT ?? "3000";
 
-export default defineConfig({
+module.exports = defineConfig({
   testDir: "tests/e2e",
-  fullyParallel: true,
+  testMatch: "**/*.spec.cjs",
+  fullyParallel: false,
+  workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: process.env.CI ? "github" : "list",
   use: {

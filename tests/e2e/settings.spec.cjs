@@ -1,35 +1,11 @@
-import { test, expect } from "@playwright/test";
-import { prisma } from "../../lib/prisma";
+const { test, expect } = require("@playwright/test");
+const { ensureTeams } = require("./db.cjs");
 
-const ensureTeams = async () => {
-  const existing = await prisma.team.findMany({
-    orderBy: { createdAt: "asc" },
-  });
+let teamA = null;
 
-  if (existing.length >= 2) return existing.slice(0, 2);
-
-  const created = [] as { id: string; name: string }[];
-  for (let i = existing.length; i < 2; i += 1) {
-    const team = await prisma.team.create({
-      data: {
-        name: `E2E Team ${Date.now()}-${i}`,
-      },
-    });
-    created.push(team);
-  }
-
-  return [...existing, ...created].slice(0, 2);
-};
-
-let teamA: { id: string; name: string } | null = null;
-
-test.beforeAll(async () => {
-  const [first] = await ensureTeams();
+test.beforeAll(() => {
+  const [first] = ensureTeams(1);
   teamA = first;
-});
-
-test.afterAll(async () => {
-  await prisma.$disconnect();
 });
 
 test("settings rename and delete (mock)", async ({ page }) => {

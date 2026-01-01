@@ -8,6 +8,7 @@ import { ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import type { Team } from "../types/viewModel";
 import { TeamSettings } from "./TeamSettings";
+import { getDeleteTeamResult } from "./teamDelete";
 
 type SettingsPageClientProps = {
   teams: Team[];
@@ -34,15 +35,14 @@ export const SettingsPageClient = ({
   };
 
   const handleDeleteTeam = () => {
-    if (teams.length <= 1) {
+    const result = getDeleteTeamResult(teams, currentTeam.id);
+    if (result.status === "blocked") {
       toast.error("最後のチームは削除できません（デモ制限）");
       return;
     }
-    const newTeams = teams.filter((t) => t.id !== currentTeam.id);
-    setTeams(newTeams);
-    const nextTeamId = newTeams[0]?.id ?? "";
+    setTeams(result.nextTeams);
     toast.success("チームを削除しました（モック）");
-    router.push(`/projects?teamId=${nextTeamId}`);
+    router.push(`/projects?teamId=${result.nextTeamId}`);
   };
 
   return (
