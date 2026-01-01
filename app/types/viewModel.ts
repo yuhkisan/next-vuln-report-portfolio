@@ -8,6 +8,7 @@ export type Vulnerability = {
   version: string;
   severity: Severity;
   dependencyType: DependencyType;
+  rootDependency: string;
   cve: string;
   description: string;
 };
