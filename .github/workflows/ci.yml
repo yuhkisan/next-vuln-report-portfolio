@@ -31,5 +31,8 @@ jobs:
       - name: Test
         run: npm test
 
+      - name: Prepare database
+        run: npm run db:push
+
       - name: Build
         run: npm run build
