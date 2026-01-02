@@ -24,7 +24,9 @@ export const AppHeader = async () => {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* ナビゲーション */}
-        <HeaderNavLinks defaultTeamId={defaultTeamId} />
+        <Suspense fallback={<Box sx={{ width: 240 }} />}>
+          <HeaderNavLinks defaultTeamId={defaultTeamId} />
+        </Suspense>
       </Toolbar>
     </AppBar>
   );
