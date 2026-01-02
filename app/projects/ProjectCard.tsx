@@ -17,14 +17,11 @@ import {
   ShieldAlert,
   AlertCircle,
 } from "lucide-react";
-import type { Project } from "../types/viewModel";
 import { ProjectMenu } from "./ProjectMenu";
 
-type Props = {
-  project: Project;
-};
+import type { Project } from "../types/viewModel";
 
-export const ProjectCard = ({ project }: Props) => {
+export const ProjectCard = ({ project }: { project: Project }) => {
   const isAnalyzing = project.status === "analyzing";
   const isFailed = project.status === "failed";
 

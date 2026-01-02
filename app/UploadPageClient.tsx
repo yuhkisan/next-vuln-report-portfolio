@@ -17,15 +17,13 @@ import { TeamIdGuard } from "./components/TeamIdGuard";
 import type { Team } from "./types/viewModel";
 import type { ApiErrorResponse, ScanResponse } from "./types/api";
 
-type UploadPageClientProps = {
-  teams: Team[];
-  defaultTeamId: string;
-};
-
 export const UploadPageClient = ({
   teams,
   defaultTeamId,
-}: UploadPageClientProps) => {
+}: {
+  teams: Team[];
+  defaultTeamId: string;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isUploading, setIsUploading] = useState(false);

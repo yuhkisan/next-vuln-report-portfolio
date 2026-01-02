@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-type TeamIdGuardProps = {
+export const TeamIdGuard = ({
+  defaultTeamId,
+}: {
   defaultTeamId: string;
-};
-
-export const TeamIdGuard = ({ defaultTeamId }: TeamIdGuardProps) => {
+}) => {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();

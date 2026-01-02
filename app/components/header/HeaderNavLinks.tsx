@@ -5,11 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { Button } from "@mui/material";
 import { UploadCloud } from "lucide-react";
 
-type HeaderNavLinksProps = {
+export const HeaderNavLinks = ({
+  defaultTeamId,
+}: {
   defaultTeamId: string;
-};
-
-export const HeaderNavLinks = ({ defaultTeamId }: HeaderNavLinksProps) => {
+}) => {
   const searchParams = useSearchParams();
   const teamId = searchParams.get("teamId") ?? defaultTeamId;
   const projectsHref = teamId ? `/projects?teamId=${teamId}` : "/projects";
