@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { AppHeader } from "./components/AppHeader";
+import { AppHeader } from "./components/header/AppHeader";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {

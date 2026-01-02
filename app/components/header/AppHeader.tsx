@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import { AppBar, Toolbar, Box } from "@mui/material";
-import { getTeams } from "../lib/data";
+import { getTeams } from "../../lib/data";
 import { TeamSelector } from "./TeamSelector";
 import { HeaderNavLinks } from "./HeaderNavLinks";
 
