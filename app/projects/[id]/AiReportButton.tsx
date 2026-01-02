@@ -11,9 +11,10 @@ import {
   Typography,
   Paper,
   CircularProgress,
+  Alert,
 } from "@mui/material";
 import { Sparkles } from "lucide-react";
-import { callGeminiAPI } from "../../lib/gemini";
+import { callGeminiAPI, isGeminiMock } from "../../lib/gemini";
 
 export const AiReportButton = ({ projectName }: { projectName: string }) => {
   const [aiDialogOpen, setAiDialogOpen] = useState(false);
@@ -72,6 +73,11 @@ export const AiReportButton = ({ projectName }: { projectName: string }) => {
           </Typography>
         </DialogTitle>
         <DialogContent sx={{ minHeight: 300, p: 4 }}>
+          {isGeminiMock && (
+            <Alert severity="info" sx={{ mb: 2 }}>
+              APIキー未設定のため、AI解説はモック結果です。
+            </Alert>
+          )}
           <Typography
             variant="subtitle2"
             color="text.secondary"
