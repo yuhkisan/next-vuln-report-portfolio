@@ -16,6 +16,7 @@ import { getProjectById, getTeams } from "@/app/lib/data";
 import { VulnerabilitySection } from "./VulnerabilitySection";
 import { AiReportButton } from "./AiReportButton";
 import { VulnerabilitySummaryCard } from "./VulnerabilitySummaryCard";
+import { TeamIdGuard } from "@/app/components/TeamIdGuard";
 
 export const ProjectDetailView = async ({
   projectId,
@@ -32,17 +33,17 @@ export const ProjectDetailView = async ({
     notFound();
   }
 
-  // TODO: チーム選択は URL/Cookie で管理すべき
   const currentTeam = teams.find((t) => t.id === project.teamId) ??
     teams[0] ?? { id: "", name: "Unknown" };
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
+      <TeamIdGuard defaultTeamId={project.teamId} />
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         {/* パンくずリスト */}
         <Breadcrumbs separator={<ChevronRight size={16} />} sx={{ mb: 2 }}>
           <Link
-            href="/projects"
+            href={`/projects?teamId=${project.teamId}`}
             style={{ textDecoration: "none", color: "inherit" }}
           >
             <Box sx={{ display: "flex", alignItems: "center" }}>

@@ -5,9 +5,11 @@ import { UploadCloud } from "lucide-react";
 import { getProjects, getTeams } from "../lib/data";
 import { HeaderActions } from "./HeaderActions";
 import { ProjectCard } from "./ProjectCard";
+import { TeamIdGuard } from "../components/TeamIdGuard";
 
 export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
   const [projects, teams] = await Promise.all([getProjects(), getTeams()]);
+  const defaultTeamId = teams.length > 0 ? teams[0].id : "";
 
   // URL で指定されたチームを使用、なければ先頭チームをデフォルトに
   const currentTeam =
@@ -18,6 +20,7 @@ export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "grey.50", pb: 8 }}>
+      <TeamIdGuard defaultTeamId={defaultTeamId} />
       <Container maxWidth="lg" sx={{ mt: 4 }}>
         {/* ヘッダー部分 */}
         <Box
@@ -48,7 +51,7 @@ export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
                 <Link
                   href={
                     project.status === "completed"
-                      ? `/projects/${project.id}`
+                      ? `/projects/${project.id}?teamId=${currentTeam.id}`
                       : "#"
                   }
                   style={{ textDecoration: "none" }}
@@ -110,7 +113,7 @@ export const ProjectListView = async ({ teamId }: { teamId?: string }) => {
               <br />
               新しいファイルをアップロードして、脆弱性スキャンを開始しましょう。
             </Typography>
-            <Link href="/" style={{ textDecoration: "none" }}>
+            <Link href={`/?teamId=${currentTeam.id}`} style={{ textDecoration: "none" }}>
               <Button
                 variant="outlined"
                 size="large"

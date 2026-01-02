@@ -1,9 +1,8 @@
 import { Suspense } from "react";
-import Link from "next/link";
-import { AppBar, Toolbar, Button, Box } from "@mui/material";
-import { UploadCloud } from "lucide-react";
+import { AppBar, Toolbar, Box } from "@mui/material";
 import { getTeams } from "../lib/data";
 import { TeamSelector } from "./TeamSelector";
+import { HeaderNavLinks } from "./HeaderNavLinks";
 
 export const AppHeader = async () => {
   const teams = await getTeams();
@@ -25,21 +24,9 @@ export const AppHeader = async () => {
         <Box sx={{ flexGrow: 1 }} />
 
         {/* ナビゲーション */}
-        <Link href="/projects" style={{ textDecoration: "none" }}>
-          <Button color="inherit" sx={{ mr: 2 }}>
-            プロジェクト一覧
-          </Button>
-        </Link>
-
-        <Link href="/" style={{ textDecoration: "none" }}>
-          <Button
-            variant="contained"
-            startIcon={<UploadCloud size={18} />}
-            disableElevation
-          >
-            新規アップロード
-          </Button>
-        </Link>
+        <Suspense fallback={<Box sx={{ width: 240 }} />}>
+          <HeaderNavLinks defaultTeamId={defaultTeamId} />
+        </Suspense>
       </Toolbar>
     </AppBar>
   );
