@@ -20,7 +20,7 @@ export const SettingsPageClient = ({
 }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [teams, setTeams] = useState<Team[]>(initialTeams);
+  const [teams, setTeams] = useState(initialTeams);
 
   const currentTeamId = searchParams.get("teamId") ?? defaultTeamId;
   const currentTeam = useMemo(() => {

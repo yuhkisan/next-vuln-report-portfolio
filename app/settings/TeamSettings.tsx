@@ -36,7 +36,7 @@ export const TeamSettings = ({
 }) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [teamName, setTeamName] = useState(team.name);
-  const [members, setMembers] = useState<Member[]>(generateMockMembers());
+  const [members, setMembers] = useState(generateMockMembers());
   const [inviteEmail, setInviteEmail] = useState("");
 
   const handleInvite = () => {
