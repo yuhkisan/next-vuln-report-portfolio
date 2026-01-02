@@ -14,12 +14,13 @@ import {
 import { ShieldAlert, Check, ChevronDown } from "lucide-react";
 import type { Team } from "../../types/viewModel";
 
-type TeamSelectorProps = {
+export const TeamSelector = ({
+  teams,
+  defaultTeamId,
+}: {
   teams: Team[];
   defaultTeamId: string;
-};
-
-export const TeamSelector = ({ teams, defaultTeamId }: TeamSelectorProps) => {
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);

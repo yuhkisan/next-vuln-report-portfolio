@@ -11,18 +11,16 @@ import { TeamSettings } from "./TeamSettings";
 import { getDeleteTeamResult } from "./teamDelete";
 import { TeamIdGuard } from "../components/TeamIdGuard";
 
-type SettingsPageClientProps = {
-  teams: Team[];
-  defaultTeamId: string;
-};
-
 export const SettingsPageClient = ({
   teams: initialTeams,
   defaultTeamId,
-}: SettingsPageClientProps) => {
+}: {
+  teams: Team[];
+  defaultTeamId: string;
+}) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [teams, setTeams] = useState<Team[]>(initialTeams);
+  const [teams, setTeams] = useState(initialTeams);
 
   const currentTeamId = searchParams.get("teamId") ?? defaultTeamId;
   const currentTeam = useMemo(() => {

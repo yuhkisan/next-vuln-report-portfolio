@@ -25,20 +25,18 @@ import { Settings, Users, Key, Trash2, Mail, XCircle } from "lucide-react";
 import type { Team, Member } from "../types/viewModel";
 import { generateMockMembers } from "../lib/mockData";
 
-type TeamSettingsProps = {
-  team: Team;
-  onUpdateTeamName: (name: string) => void;
-  onDeleteTeam: () => void;
-};
-
 export const TeamSettings = ({
   team,
   onUpdateTeamName,
   onDeleteTeam,
-}: TeamSettingsProps) => {
+}: {
+  team: Team;
+  onUpdateTeamName: (name: string) => void;
+  onDeleteTeam: () => void;
+}) => {
   const [tabIndex, setTabIndex] = useState(0);
   const [teamName, setTeamName] = useState(team.name);
-  const [members, setMembers] = useState<Member[]>(generateMockMembers());
+  const [members, setMembers] = useState(generateMockMembers());
   const [inviteEmail, setInviteEmail] = useState("");
 
   const handleInvite = () => {

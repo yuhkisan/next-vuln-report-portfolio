@@ -19,11 +19,7 @@ import { MoreVertical, Edit2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import type { Project } from "../types/viewModel";
 
-type Props = {
-  project: Project;
-};
-
-export const ProjectMenu = ({ project }: Props) => {
+export const ProjectMenu = ({ project }: { project: Project }) => {
   const router = useRouter();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);

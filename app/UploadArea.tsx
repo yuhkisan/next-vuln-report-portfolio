@@ -2,11 +2,11 @@ import React, { useState, useRef } from "react";
 import { Paper, Box, Typography, Button } from "@mui/material";
 import { UploadCloud } from "lucide-react";
 
-type UploadAreaProps = {
+export const UploadArea = ({
+  onUpload,
+}: {
   onUpload: (file: File) => void;
-};
-
-export const UploadArea = ({ onUpload }: UploadAreaProps) => {
+}) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragActive, setIsDragActive] = useState(false);
 
