@@ -118,6 +118,10 @@ npm test
 npm run test:e2e
 ```
 
+### CI
+
+- GitHub Actions で lint/test/build を実行
+
 ### モックデータの管理
 
 - `app/lib/fixtures/`: テスト用の固定ルールと擬似ロジック
@@ -143,4 +147,3 @@ npm run test:e2e
 1. **実データ連携**: OSV 等の脆弱性 DB に接続
 2. **チーム状態の統一**: URL/Cookie で teamId を一貫管理
 3. **依存グラフ拡張**: Dependency Path の精度向上
-4. **CI/CD**: GitHub Actions で lint/test/build を自動化
