@@ -1,5 +1,8 @@
 const apiKey = "";
 
+export const isGeminiConfigured = Boolean(apiKey);
+export const isGeminiMock = !isGeminiConfigured;
+
 export async function callGeminiAPI(prompt: string): Promise<string> {
   if (!apiKey) {
     console.warn("Gemini API Key is missing. Using mock response.");

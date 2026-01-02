@@ -10,6 +10,7 @@ import {
   Paper,
   TextField,
   Button,
+  Alert,
   Table,
   TableBody,
   TableCell,
@@ -57,6 +58,9 @@ export const TeamSettings = ({
       <Typography variant="h4" fontWeight="bold" sx={{ mb: 3 }}>
         チーム設定
       </Typography>
+      <Alert severity="info" sx={{ mb: 3 }}>
+        この設定画面はデモ用のモック挙動です。保存/削除/招待/APIキーの変更は実際には反映されません。
+      </Alert>
       <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
         <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)}>
           <Tab
