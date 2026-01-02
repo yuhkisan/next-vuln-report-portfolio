@@ -12,7 +12,7 @@ import {
   ListItemText,
 } from "@mui/material";
 import { ShieldAlert, Check, ChevronDown } from "lucide-react";
-import type { Team } from "../types/viewModel";
+import type { Team } from "../../types/viewModel";
 
 type TeamSelectorProps = {
   teams: Team[];
